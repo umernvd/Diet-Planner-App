@@ -3,6 +3,9 @@
 [![Platform](https://img.shields.io/badge/Platform-Flutter-blue?logo=flutter&logoColor=white)](https://flutter.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen)](#)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Maintenance](https://img.shields.io/badge/Maintained-yes-green.svg)](https://github.com/muzamilfaryad/Diet_Planner_Application/graphs/commit-activity)
+[![Security](https://img.shields.io/badge/Security-Policy-blue)](SECURITY.md)
 
 A comprehensive, cross-platform mobile and web application built with Flutter that empowers users to manage their nutritional goals, track calorie intake, create personalized meal plans, and discover recipes. Featuring barcode scanning, real-time API integration, and a modern, beautiful UI.
 
@@ -39,6 +42,14 @@ A comprehensive, cross-platform mobile and web application built with Flutter th
 - **Full Instructions**: Step-by-step cooking instructions
 - **Ingredient Lists**: Complete ingredient breakdown
 - **YouTube Videos**: Linked cooking tutorials
+
+### 🔥 Firebase Integration
+- **Email/Password Authentication**: Secure user accounts
+- **Cloud Firestore**: Real-time data sync across devices
+- **Offline Support**: Local cache with automatic sync
+- **Guest Mode**: Use app without signing in
+- **Profile Management**: Sign in/out, password reset
+- **Data Privacy**: User data isolated and secure
 
 ### 🎨 Modern UI/UX
 - **Material Design 3**: Modern, clean design language
@@ -90,11 +101,17 @@ The app works immediately without any configuration. Core features use free publ
 - ✅ **OpenFoodFacts** - Food database and barcode lookup
 - ✅ **TheMealDB** - Recipe discovery and search
 
-**Optional Enhancements** (requires free API keys):
-- 🔧 **CalorieNinjas** - Natural language nutrition search
+**Optional AI Enhancements** (free, secure setup):
+- 🤖 **Hugging Face AI** - Natural language food parsing, recipe generation, nutrition chatbot
+  - **Status**: ✅ **FIXED & SECURED** (Nov 2024)
+  - **Setup**: See [AI_INTEGRATION_GUIDE.md](AI_INTEGRATION_GUIDE.md)
+  - Get free API key (no payment): https://huggingface.co/settings/tokens
+
+**Other Optional APIs**:
+- 🔧 **CalorieNinjas** - Enhanced nutrition search
 - 🔧 **Edamam** - Advanced recipe search with 2.3M+ recipes
 
-See [API_INTEGRATION_GUIDE.md](API_INTEGRATION_GUIDE.md) for details.
+See [docs/guides/API_INTEGRATION_GUIDE.md](docs/guides/API_INTEGRATION_GUIDE.md) for details.
 
 ---
 
@@ -120,35 +137,25 @@ See [API_INTEGRATION_GUIDE.md](API_INTEGRATION_GUIDE.md) for details.
 FlutterProjectDietPlanner/
 ├── diet_planner_app/              # Main Flutter application
 │   ├── lib/
+│   │   ├── config/                # Configuration files
 │   │   ├── models/                # Data models (User, Meal, FoodItem, etc.)
-│   │   │   ├── food_item.dart
-│   │   │   ├── meal.dart
-│   │   │   ├── meal_plan.dart
-│   │   │   └── user_profile.dart
 │   │   ├── services/              # Business logic & API integration
-│   │   │   ├── enhanced_api_service.dart
-│   │   │   ├── meal_plan_service.dart
-│   │   │   ├── barcode_scanner_service.dart
-│   │   │   └── api_config.dart
 │   │   ├── screens/               # UI screens
-│   │   │   ├── home_screen_redesigned.dart
-│   │   │   ├── log_food_screen.dart
-│   │   │   ├── meal_planner_screen.dart
-│   │   │   ├── progress_screen.dart
-│   │   │   └── recipe_screen_enhanced.dart
 │   │   ├── widgets/               # Reusable UI components
-│   │   │   ├── animated_progress_ring.dart
-│   │   │   ├── glass_card.dart
-│   │   │   └── food_search.dart
 │   │   └── main.dart              # Application entry point
-│   ├── android/                   # Android specific files
-│   ├── ios/                       # iOS specific files
-│   ├── web/                       # Web specific files
+│   ├── android/                   # Android platform files
+│   ├── ios/                       # iOS platform files
+│   ├── web/                       # Web platform files
 │   └── pubspec.yaml               # Dependencies & configuration
-├── API_INTEGRATION_GUIDE.md       # Complete API documentation
-├── MEAL_PLANNER_FEATURES.md       # Meal planning feature details
-├── BARCODE_SCANNING_GUIDE.md      # Barcode implementation guide
-├── UI_ENHANCEMENTS.md             # Design system documentation
+├── docs/                          # 📚 Documentation
+│   ├── setup/                     # Setup & configuration guides
+│   ├── features/                  # Feature documentation
+│   ├── guides/                    # Integration & development guides
+│   └── README.md                  # Documentation index
+├── CHANGELOG.md                   # Version history
+├── CONTRIBUTING.md                # Contribution guidelines
+├── LICENSE                        # MIT License
+├── SECURITY.md                    # Security policy
 └── README.md                      # This file
 ```
 
@@ -156,17 +163,21 @@ FlutterProjectDietPlanner/
 
 ## 📚 Documentation
 
-Detailed documentation is available for each major feature:
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
-- **[API Integration Guide](API_INTEGRATION_GUIDE.md)** - Complete API setup and usage
-- **[Meal Planner Features](MEAL_PLANNER_FEATURES.md)** - Meal planning functionality
-- **[Barcode Scanning Guide](BARCODE_SCANNING_GUIDE.md)** - Barcode scanning implementation
-- **[UI Enhancements](UI_ENHANCEMENTS.md)** - Design system and components
-- **[API Quick Start](API_QUICK_START.md)** - Fast API setup guide
-- **[Search Improvements](SEARCH_IMPROVEMENT_SUMMARY.md)** - Search functionality details
-- **[Recipe Layout Fixes](RECIPE_LAYOUT_FIXES.md)** - Recipe UI improvements
-- **[CORS Fix Documentation](CORS_FIX_DOCUMENTATION.md)** - Web API troubleshooting
-- **[Git Push Guide](GIT_PUSH_GUIDE.md)** - Version control instructions
+### Quick Links
+- **[Documentation Index](docs/README.md)** - Complete documentation overview
+- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute
+- **[Changelog](CHANGELOG.md)** - Version history and updates
+- **[Security Policy](SECURITY.md)** - Security guidelines and reporting
+
+### Popular Guides
+- **[Firebase Setup](docs/setup/FIREBASE_SETUP_GUIDE.md)** - Backend integration
+- **[API Integration](docs/guides/API_INTEGRATION_GUIDE.md)** - API configuration
+- **[AI Features](docs/features/AI_FEATURES_GUIDE.md)** - AI capabilities
+- **[Production Checklist](docs/guides/PRODUCTION_READY_CHECKLIST.md)** - Deployment guide
+
+**→ See [docs/README.md](docs/README.md) for complete documentation index**
 
 ---
 
@@ -312,9 +323,9 @@ See individual documentation files for more troubleshooting tips.
 ## 🔮 Future Enhancements
 
 ### Planned Features
-- [ ] **User Authentication**: Firebase Auth integration
-- [ ] **Data Persistence**: Save user data to cloud (Firestore)
-- [ ] **Offline Support**: Local database with sync
+- [x] **User Authentication**: Firebase Auth integration ✅ **NEW!**
+- [x] **Data Persistence**: Save user data to cloud (Firestore) ✅ **NEW!**
+- [x] **Offline Support**: Local database with sync ✅ **NEW!**
 - [ ] **Weekly View**: Calendar grid for meal planning
 - [ ] **Meal Templates**: Save favorite meal combinations
 - [ ] **Shopping List**: Auto-generate from meal plans

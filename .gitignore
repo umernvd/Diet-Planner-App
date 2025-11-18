@@ -1,0 +1,69 @@
+# ============================================================================
+# Diet Planner Application - Root .gitignore
+# ============================================================================
+
+# IDE & Editor Files
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node.js (if accidentally added)
+node_modules/
+package-lock.json
+npm-debug.log
+yarn-error.log
+
+# Build & Distribution
+build/
+dist/
+*.apk
+*.aab
+*.ipa
+
+# Sensitive Configuration Files
+**/firebase_options.dart
+**/*config*.dart
+!**/config/ai_config.dart
+**/*.env
+**/.env.*
+**/secrets.json
+**/api_keys.dart
+
+# Logs
+*.log
+logs/
+
+# Temporary Files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Testing
+coverage/
+test/coverage/
+
+# Documentation Build Artifacts
+docs/_build/
+docs/.doctrees/
+
+# Backup Files
+*.bak
+*.backup
+*~
+
+# Misc
+.flutter-plugins-dependencies
+pubspec.lock
