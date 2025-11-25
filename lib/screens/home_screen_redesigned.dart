@@ -4,6 +4,7 @@ import '../models/user_profile.dart';
 import '../services/food_database_service.dart';
 import '../services/firebase_auth_service.dart';
 import '../widgets/animated_progress_ring.dart';
+import '../features/calculator/presentation/screens/bmr_calculator_input_screen.dart';
 import 'log_food_screen.dart';
 import 'meal_planner_screen.dart';
 import 'progress_screen.dart';
@@ -480,6 +481,21 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 12),
+                    _buildAIFeatureCard(
+                      'BMR Calculator',
+                      'Calculate your daily calorie needs',
+                      Icons.local_fire_department_rounded,
+                      const Color(0xFFFFB703),
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const BmrCalculatorInputScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

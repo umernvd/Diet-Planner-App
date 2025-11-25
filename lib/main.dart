@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
 
-import 'screens/home_screen_redesigned.dart';
-// auth screens imported where needed
+import 'screens/home_screen_new.dart';
 import 'services/food_database_service.dart';
-// Firebase auth service imported where needed in screens/services
 import 'services/huggingface_ai_service.dart';
 import 'config/ai_config.dart';
+import 'config/app_theme.dart';
 import 'models/food_item.dart';
 
 final _logger = Logger();
@@ -144,100 +143,26 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // FirebaseAuthService can be accessed from screens/services when needed
+  @override
+  void initState() {
+    super.initState();
+    // Set system UI overlay style for a polished look
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Modern color palette
-    const primaryColor = Color(0xFF00B4D8);
-    const secondaryColor = Color(0xFF90E0EF);
-    const accentColor = Color(0xFF0077B6);
-    // Theme accent colors (kept in theme definitions below)
-
-    final base = ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
-        brightness: Brightness.light,
-        primary: primaryColor,
-        secondary: secondaryColor,
-        tertiary: accentColor,
-      ),
-      useMaterial3: true,
-      scaffoldBackgroundColor: const Color(0xFFF8F9FA),
-      cardTheme: CardThemeData(
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        color: Colors.white,
-        shadowColor: Color.fromRGBO(0, 0, 0, 0.05),
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      ),
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 16,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey.shade200),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey.shade200),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: primaryColor, width: 2),
-        ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
-        ),
-      ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
-      ),
-    );
-
-    // Try to load Google Fonts, fallback to system fonts if it fails
-    TextTheme textTheme;
-    TextTheme primaryTextTheme;
-    try {
-      textTheme = GoogleFonts.interTextTheme(base.textTheme);
-      primaryTextTheme = GoogleFonts.interTextTheme(base.primaryTextTheme);
-    } catch (e) {
-      _logger.w('Failed to load Google Fonts: $e');
-      textTheme = base.textTheme;
-      primaryTextTheme = base.primaryTextTheme;
-    }
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Diet Planner',
-      theme: base.copyWith(
-        textTheme: textTheme,
-        primaryTextTheme: primaryTextTheme,
-      ),
-      // Show home screen directly - Firebase auth optional
-      // Users can access Profile screen to sign in if they want cloud sync
+      theme: AppTheme.lightTheme,
       home: const HomeScreenRedesigned(),
     );
   }

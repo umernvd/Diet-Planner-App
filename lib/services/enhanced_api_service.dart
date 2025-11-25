@@ -25,18 +25,18 @@ class EnhancedApiService {
   static final EnhancedApiService instance = EnhancedApiService._private();
   final http.Client _http = http.Client();
 
-  // OpenFoodFacts search with retry logic
+  // OpenFoodFacts search with retry logic and relevance filtering
   Future<List<FoodItem>> searchOpenFoodFacts(
     String query, {
     int retries = 2,
   }) async {
-    final q = query.trim();
+    final q = query.trim().toLowerCase();
     if (q.isEmpty) return [];
 
     for (int attempt = 0; attempt <= retries; attempt++) {
       try {
         String urlStr =
-            'https://world.openfoodfacts.org/cgi/search.pl?search_terms=${Uri.encodeComponent(q)}&search_simple=1&action=process&json=1&page_size=30';
+            'https://world.openfoodfacts.org/cgi/search.pl?search_terms=${Uri.encodeComponent(query)}&search_simple=1&action=process&json=1&page_size=50';
         if (kIsWeb) {
           urlStr = 'https://corsproxy.io/?${Uri.encodeComponent(urlStr)}';
         }
@@ -54,12 +54,72 @@ class EnhancedApiService {
         if (resp.statusCode == 200) {
           final json = jsonDecode(resp.body) as Map<String, dynamic>;
           final products = (json['products'] as List<dynamic>?) ?? [];
-          final items = products
+
+          // Parse all products
+          final allItems = products
               .map((p) => _foodItemFromOpenFoodFacts(p as Map<String, dynamic>))
               .whereType<FoodItem>()
               .where((item) => item.name.isNotEmpty && item.calories >= 0)
               .toList();
-          _logger.i('Found ${items.length} valid items from OpenFoodFacts');
+
+          // Score and filter by relevance
+          final queryWords = q.split(' ').where((w) => w.isNotEmpty).toList();
+          final scoredItems = allItems
+              .map((item) {
+                final itemName = item.name.toLowerCase();
+                double score = 0;
+
+                // Exact match gets highest score
+                if (itemName == q) {
+                  score = 100;
+                }
+                // Starts with query
+                else if (itemName.startsWith(q)) {
+                  score = 90;
+                }
+                // Contains exact query
+                else if (itemName.contains(q)) {
+                  score = 80;
+                }
+                // All query words present
+                else {
+                  int matchedWords = 0;
+                  for (final word in queryWords) {
+                    if (itemName.contains(word)) {
+                      matchedWords++;
+                      score += 10;
+                    }
+                  }
+                  // Bonus if all words matched
+                  if (matchedWords == queryWords.length) {
+                    score += 20;
+                  }
+                }
+
+                // Penalty for very long names (likely less relevant)
+                if (itemName.length > q.length * 3) {
+                  score -= 10;
+                }
+
+                return {'item': item, 'score': score};
+              })
+              .where((entry) => entry['score'] as double > 0)
+              .toList();
+
+          // Sort by score descending
+          scoredItems.sort(
+            (a, b) => (b['score'] as double).compareTo(a['score'] as double),
+          );
+
+          // Return top 20 most relevant results
+          final items = scoredItems
+              .take(20)
+              .map((entry) => entry['item'] as FoodItem)
+              .toList();
+
+          _logger.i(
+            'Found ${items.length} relevant items from OpenFoodFacts (filtered from ${allItems.length})',
+          );
           return items;
         } else if (resp.statusCode == 429) {
           // Rate limited - wait before retry
@@ -276,11 +336,33 @@ class EnhancedApiService {
       return meals
           .map((m) {
             final map = m as Map<String, dynamic>;
+
+            // Extract ingredients from strIngredient1-20 and strMeasure1-20
+            final ingredients = <Map<String, String>>[];
+            for (int j = 1; j <= 20; j++) {
+              final ingredient =
+                  map['strIngredient$j']?.toString().trim() ?? '';
+              final measure = map['strMeasure$j']?.toString().trim() ?? '';
+              if (ingredient.isNotEmpty && ingredient.toLowerCase() != 'null') {
+                ingredients.add({
+                  'ingredient': ingredient,
+                  'measure':
+                      measure.isNotEmpty && measure.toLowerCase() != 'null'
+                      ? measure
+                      : '',
+                });
+              }
+            }
+
             return {
               'id': map['idMeal'] ?? '',
               'name': map['strMeal'] ?? 'Unknown Recipe',
-              'category': map['strCategory'] ?? 'Other',
+              'category': map['strCategory'] ?? '',
+              'area': map['strArea'] ?? '',
+              'instructions': map['strInstructions'] ?? '',
               'thumbnail': map['strMealThumb'] ?? '',
+              'image': map['strMealThumb'] ?? '',
+              'ingredients': ingredients,
             };
           })
           .where((recipe) => recipe['name'].toString().isNotEmpty)
@@ -296,21 +378,50 @@ class EnhancedApiService {
       final recipes = <Map<String, dynamic>>[];
       for (int i = 0; i < count; i++) {
         final uri = Uri.https('www.themealdb.com', '/api/json/v1/1/random.php');
-        final resp = await _http.get(uri).timeout(const Duration(seconds: 5));
+        final resp = await _http.get(uri).timeout(const Duration(seconds: 10));
         if (resp.statusCode == 200) {
           final json = jsonDecode(resp.body) as Map<String, dynamic>;
           final meals = (json['meals'] as List<dynamic>?) ?? [];
           if (meals.isNotEmpty) {
+            final meal = meals[0] as Map<String, dynamic>;
+
+            // Extract ingredients from strIngredient1-20 and strMeasure1-20
+            final ingredients = <Map<String, String>>[];
+            for (int j = 1; j <= 20; j++) {
+              final ingredient =
+                  meal['strIngredient$j']?.toString().trim() ?? '';
+              final measure = meal['strMeasure$j']?.toString().trim() ?? '';
+              if (ingredient.isNotEmpty && ingredient.toLowerCase() != 'null') {
+                ingredients.add({
+                  'ingredient': ingredient,
+                  'measure':
+                      measure.isNotEmpty && measure.toLowerCase() != 'null'
+                      ? measure
+                      : '',
+                });
+              }
+            }
+
             recipes.add({
-              'id': meals[0]['idMeal'],
-              'name': meals[0]['strMeal'],
+              'id': meal['idMeal'] ?? '',
+              'name': meal['strMeal'] ?? 'Unknown Recipe',
+              'category': meal['strCategory'] ?? '',
+              'area': meal['strArea'] ?? '',
+              'instructions': meal['strInstructions'] ?? '',
+              'thumbnail': meal['strMealThumb'] ?? '',
+              'image': meal['strMealThumb'] ?? '',
+              'ingredients': ingredients,
             });
           }
         }
+        // Small delay between requests to avoid rate limiting
+        if (i < count - 1) {
+          await Future.delayed(const Duration(milliseconds: 200));
+        }
       }
       return recipes;
-    } catch (e) {
-      _logger.e('Random recipes error: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Random recipes error: $e', error: e, stackTrace: stackTrace);
       return [];
     }
   }
@@ -319,18 +430,90 @@ class EnhancedApiService {
     String category,
   ) async {
     try {
+      // First get the list of recipes in the category
       final uri = Uri.https('www.themealdb.com', '/api/json/v1/1/filter.php', {
         'c': category,
       });
       final resp = await _http.get(uri).timeout(const Duration(seconds: 10));
       if (resp.statusCode != 200) return [];
+
       final json = jsonDecode(resp.body) as Map<String, dynamic>;
       final meals = (json['meals'] as List<dynamic>?) ?? [];
-      return meals
-          .map((m) => {'id': m['idMeal'], 'name': m['strMeal']})
-          .toList();
-    } catch (e) {
-      _logger.e('Category error: $e');
+
+      // Get full details for each recipe (limited to first 10 to avoid too many requests)
+      final detailedRecipes = <Map<String, dynamic>>[];
+      final limit = meals.length > 10 ? 10 : meals.length;
+
+      for (int i = 0; i < limit; i++) {
+        final meal = meals[i] as Map<String, dynamic>;
+        final mealId = meal['idMeal']?.toString() ?? '';
+
+        if (mealId.isNotEmpty) {
+          try {
+            // Get full meal details
+            final detailUri = Uri.https(
+              'www.themealdb.com',
+              '/api/json/v1/1/lookup.php',
+              {'i': mealId},
+            );
+            final detailResp = await _http
+                .get(detailUri)
+                .timeout(const Duration(seconds: 5));
+
+            if (detailResp.statusCode == 200) {
+              final detailJson =
+                  jsonDecode(detailResp.body) as Map<String, dynamic>;
+              final detailMeals = (detailJson['meals'] as List<dynamic>?) ?? [];
+
+              if (detailMeals.isNotEmpty) {
+                final fullMeal = detailMeals[0] as Map<String, dynamic>;
+
+                // Extract ingredients
+                final ingredients = <Map<String, String>>[];
+                for (int j = 1; j <= 20; j++) {
+                  final ingredient =
+                      fullMeal['strIngredient$j']?.toString().trim() ?? '';
+                  final measure =
+                      fullMeal['strMeasure$j']?.toString().trim() ?? '';
+                  if (ingredient.isNotEmpty &&
+                      ingredient.toLowerCase() != 'null') {
+                    ingredients.add({
+                      'ingredient': ingredient,
+                      'measure':
+                          measure.isNotEmpty && measure.toLowerCase() != 'null'
+                          ? measure
+                          : '',
+                    });
+                  }
+                }
+
+                detailedRecipes.add({
+                  'id': fullMeal['idMeal'] ?? '',
+                  'name': fullMeal['strMeal'] ?? 'Unknown Recipe',
+                  'category': fullMeal['strCategory'] ?? '',
+                  'area': fullMeal['strArea'] ?? '',
+                  'instructions': fullMeal['strInstructions'] ?? '',
+                  'thumbnail': fullMeal['strMealThumb'] ?? '',
+                  'image': fullMeal['strMealThumb'] ?? '',
+                  'ingredients': ingredients,
+                });
+              }
+            }
+
+            // Small delay to avoid rate limiting
+            if (i < limit - 1) {
+              await Future.delayed(const Duration(milliseconds: 200));
+            }
+          } catch (e) {
+            _logger.w('Error fetching details for meal $mealId: $e');
+            // Continue with next meal
+          }
+        }
+      }
+
+      return detailedRecipes;
+    } catch (e, stackTrace) {
+      _logger.e('Category error: $e', error: e, stackTrace: stackTrace);
       return [];
     }
   }

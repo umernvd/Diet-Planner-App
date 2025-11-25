@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import '../config/app_theme.dart';
 import '../models/meal.dart';
 import '../models/meal_plan.dart';
 import '../models/food_item.dart';
 import '../models/user_profile.dart';
 import '../services/meal_plan_service.dart';
 import '../widgets/food_search.dart';
+import '../widgets/animated_widgets.dart';
 
 class MealPlannerScreen extends StatefulWidget {
   const MealPlannerScreen({super.key});
@@ -13,17 +15,30 @@ class MealPlannerScreen extends StatefulWidget {
   State<MealPlannerScreen> createState() => _MealPlannerScreenState();
 }
 
-class _MealPlannerScreenState extends State<MealPlannerScreen> {
+class _MealPlannerScreenState extends State<MealPlannerScreen>
+    with TickerProviderStateMixin {
   final _planService = MealPlanService.instance;
   final _profile = UserProfile.sample();
 
   DateTime _selectedDate = DateTime.now();
   MealPlan? _currentPlan;
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
     _loadPlan();
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   void _loadPlan() {
@@ -38,6 +53,18 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
       initialDate: _selectedDate,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppTheme.primary,
+              onPrimary: Colors.white,
+              surface: AppTheme.surface,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null && picked != _selectedDate) {
       setState(() {
@@ -225,91 +252,137 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
   @override
   Widget build(BuildContext context) {
     if (_currentPlan == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Container(
+        decoration: BoxDecoration(gradient: AppTheme.heroGradient),
+        child: const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
     }
 
-    final theme = Theme.of(context);
     final goalCalories = _profile.goal.dailyCalories;
     final planCalories = _currentPlan!.totalCalories;
     final calorieProgress = goalCalories > 0
         ? (planCalories / goalCalories).clamp(0.0, 1.0)
         : 0.0;
 
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            title: const Text('Meal Planner'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.more_vert),
-                onPressed: _showPlanOptions,
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      theme.colorScheme.primary,
-                      theme.colorScheme.primaryContainer,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-              ),
-            ),
+    return Container(
+      decoration: BoxDecoration(gradient: AppTheme.heroGradient),
+      child: SafeArea(
+        bottom: false,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Date Selector
-                  Card(
-                    child: InkWell(
+          slivers: [
+            // Hero Header
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Meal Planner',
+                          style: AppTheme.headlineLarge.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusMd,
+                            ),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.more_vert_rounded,
+                              color: Colors.white,
+                            ),
+                            onPressed: _showPlanOptions,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Date Selector Card
+                    GestureDetector(
                       onTap: () => _selectDate(context),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusXl,
+                          ),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.2),
+                          ),
+                        ),
                         child: Row(
                           children: [
-                            Icon(
-                              Icons.calendar_today,
-                              color: theme.colorScheme.primary,
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusMd,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.calendar_today_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 14),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     'Selected Date',
-                                    style: theme.textTheme.bodySmall,
+                                    style: AppTheme.bodySmall.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                    ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '${_selectedDate.month}/${_selectedDate.day}/${_selectedDate.year}',
-                                    style: theme.textTheme.titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                    _formatDate(_selectedDate),
+                                    style: AppTheme.titleMedium.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                            const Icon(Icons.chevron_right),
+                            const Icon(
+                              Icons.chevron_right_rounded,
+                              color: Colors.white,
+                            ),
                           ],
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
-                  // Nutrition Summary
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                    // Nutrition Summary Card
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusXxl),
+                        boxShadow: AppTheme.shadowMd,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -318,133 +391,190 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                             children: [
                               Text(
                                 'Daily Totals',
-                                style: theme.textTheme.titleMedium?.copyWith(
+                                style: AppTheme.titleMedium.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
-                                '${planCalories.toStringAsFixed(0)} / ${goalCalories.toStringAsFixed(0)} kcal',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  gradient: calorieProgress > 0.9
+                                      ? AppTheme.warningGradient
+                                      : AppTheme.primaryGradient,
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.radiusFull,
+                                  ),
+                                ),
+                                child: Text(
+                                  '${planCalories.toStringAsFixed(0)} / ${goalCalories.toStringAsFixed(0)} kcal',
+                                  style: AppTheme.labelMedium.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
-                          LinearProgressIndicator(
-                            value: calorieProgress,
-                            minHeight: 8,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
                           const SizedBox(height: 16),
+                          AnimatedProgressBar(
+                            progress: calorieProgress,
+                            height: 10,
+                            gradient: calorieProgress > 0.9
+                                ? AppTheme.warningGradient
+                                : AppTheme.primaryGradient,
+                          ),
+                          const SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              _buildMacroChip(
+                              _buildMacroStat(
                                 'Protein',
                                 _currentPlan!.totalProtein,
-                                'g',
-                                Colors.red,
+                                AppTheme.accentRose,
                               ),
-                              _buildMacroChip(
+                              _buildMacroStat(
                                 'Carbs',
                                 _currentPlan!.totalCarbs,
-                                'g',
-                                Colors.blue,
+                                AppTheme.primary,
                               ),
-                              _buildMacroChip(
+                              _buildMacroStat(
                                 'Fat',
                                 _currentPlan!.totalFat,
-                                'g',
-                                Colors.orange,
+                                AppTheme.accentWarm,
                               ),
                             ],
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
 
-                  // Notes section
-                  if (_currentPlan!.notes != null &&
-                      _currentPlan!.notes!.isNotEmpty)
-                    Card(
-                      color: Colors.amber.shade50,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
+                    // Notes section
+                    if (_currentPlan!.notes != null &&
+                        _currentPlan!.notes!.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppTheme.accentWarm.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusLg,
+                          ),
+                          border: Border.all(
+                            color: AppTheme.accentWarm.withValues(alpha: 0.3),
+                          ),
+                        ),
                         child: Row(
                           children: [
-                            const Icon(Icons.note, color: Colors.amber),
+                            const Icon(
+                              Icons.sticky_note_2_rounded,
+                              color: AppTheme.accentWarm,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 _currentPlan!.notes!,
-                                style: theme.textTheme.bodyMedium,
+                                style: AppTheme.bodyMedium,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                ],
+                    ],
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // Meals List
-          SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final meal = _currentPlan!.meals[index];
-              return _buildMealCard(meal);
-            }, childCount: _currentPlan!.meals.length),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 80)),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // Quick add to next meal
-          final now = TimeOfDay.now();
-          final hour = now.hour;
-          MealType nextMeal;
-          if (hour < 10) {
-            nextMeal = MealType.breakfast;
-          } else if (hour < 14) {
-            nextMeal = MealType.lunch;
-          } else if (hour < 19) {
-            nextMeal = MealType.dinner;
-          } else {
-            nextMeal = MealType.snack;
-          }
-          _addFoodToMeal(nextMeal);
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Quick Add'),
+            // Meals List
+            SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final meal = _currentPlan!.meals[index];
+                return SlideTransition(
+                  position:
+                      Tween<Offset>(
+                        begin: const Offset(0.3, 0),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: _animationController,
+                          curve: Interval(
+                            0.1 * index,
+                            0.1 * index + 0.4,
+                            curve: Curves.easeOutCubic,
+                          ),
+                        ),
+                      ),
+                  child: FadeTransition(
+                    opacity: Tween<double>(begin: 0, end: 1).animate(
+                      CurvedAnimation(
+                        parent: _animationController,
+                        curve: Interval(
+                          0.1 * index,
+                          0.1 * index + 0.4,
+                          curve: Curves.easeOut,
+                        ),
+                      ),
+                    ),
+                    child: _buildMealCard(meal),
+                  ),
+                );
+              }, childCount: _currentPlan!.meals.length),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 120)),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildMacroChip(String label, double value, String unit, Color color) {
+  String _formatDate(DateTime date) {
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    final weekdays = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+    return '${weekdays[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
+  }
+
+  Widget _buildMacroStat(String label, double value, Color color) {
     return Column(
       children: [
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-        ),
-        const SizedBox(height: 4),
+        Text(label, style: AppTheme.bodySmall),
+        const SizedBox(height: 6),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: color.withAlpha((0.1 * 255).round()),
-            borderRadius: BorderRadius.circular(8),
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           ),
           child: Text(
-            '${value.toStringAsFixed(1)}$unit',
-            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+            '${value.toStringAsFixed(1)}g',
+            style: AppTheme.titleSmall.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
@@ -452,154 +582,262 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
   }
 
   Widget _buildMealCard(Meal meal) {
-    final theme = Theme.of(context);
     final isEmpty = meal.foods.isEmpty;
+    final mealColors = _getMealColors(meal.type);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(8),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+          boxShadow: AppTheme.shadowSm,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: mealColors,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (mealColors.colors.first).withValues(
+                            alpha: 0.3,
+                          ),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      _getMealIcon(meal.type),
+                      color: Colors.white,
+                      size: 22,
+                    ),
                   ),
-                  child: Icon(
-                    _getMealIcon(meal.type),
-                    color: theme.colorScheme.primary,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          meal.type.displayName,
+                          style: AppTheme.titleMedium.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (meal.scheduledTime != null)
+                          Text(
+                            '${meal.scheduledTime!.hour.toString().padLeft(2, '0')}:${meal.scheduledTime!.minute.toString().padLeft(2, '0')}',
+                            style: AppTheme.bodySmall,
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        meal.type.displayName,
-                        style: theme.textTheme.titleMedium?.copyWith(
+                  if (!isEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: mealColors.colors.first.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.radiusFull,
+                        ),
+                      ),
+                      child: Text(
+                        '${meal.totalCalories.toStringAsFixed(0)} kcal',
+                        style: AppTheme.labelMedium.copyWith(
+                          color: mealColors.colors.first,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (meal.scheduledTime != null)
+                    ),
+                  const SizedBox(width: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.add_rounded,
+                        color: AppTheme.primary,
+                      ),
+                      onPressed: () => _addFoodToMeal(meal.type),
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: GestureDetector(
+                  onTap: () => _addFoodToMeal(meal.type),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceVariant.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                      border: Border.all(
+                        color: AppTheme.divider,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_rounded, color: AppTheme.textTertiary),
+                        const SizedBox(width: 8),
                         Text(
-                          '${meal.scheduledTime!.hour.toString().padLeft(2, '0')}:${meal.scheduledTime!.minute.toString().padLeft(2, '0')}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
+                          'Add foods to ${meal.type.displayName.toLowerCase()}',
+                          style: AppTheme.bodyMedium,
                         ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-                if (!isEmpty)
-                  Container(
+              )
+            else
+              Column(
+                children: meal.foods.asMap().entries.map((entry) {
+                  final food = entry.value;
+                  return Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                      horizontal: 16,
+                      vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withAlpha(
-                        (0.1 * 255).round(),
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${meal.totalCalories.toStringAsFixed(0)} kcal',
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                      border: Border(
+                        top: BorderSide(color: AppTheme.divider, width: 0.5),
                       ),
                     ),
-                  ),
-                IconButton(
-                  icon: const Icon(Icons.add_circle_outline),
-                  onPressed: () => _addFoodToMeal(meal.type),
-                  color: theme.colorScheme.primary,
-                ),
-              ],
-            ),
-          ),
-          if (isEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: InkWell(
-                onTap: () => _addFoodToMeal(meal.type),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey.shade300,
-                      style: BorderStyle.solid,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add, color: Colors.grey[600]),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Add foods to ${meal.type.displayName.toLowerCase()}',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            )
-          else
-            Column(
-              children: meal.foods.map((food) {
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  title: Text(food.name),
-                  subtitle: Text(
-                    'P: ${food.protein}g · C: ${food.carbs}g · F: ${food.fat}g',
-                    style: theme.textTheme.bodySmall,
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${food.calories.toStringAsFixed(0)} kcal',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                food.name,
+                                style: AppTheme.titleMedium.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  _buildMiniMacro(
+                                    'P',
+                                    food.protein,
+                                    AppTheme.accentRose,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _buildMiniMacro(
+                                    'C',
+                                    food.carbs,
+                                    AppTheme.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _buildMiniMacro(
+                                    'F',
+                                    food.fat,
+                                    AppTheme.accentWarm,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close, size: 20),
-                        onPressed: () => _removeFoodFromMeal(meal.type, food),
-                        color: Colors.grey[600],
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-        ],
+                        Text(
+                          '${food.calories.toStringAsFixed(0)}',
+                          style: AppTheme.titleMedium.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                        Text(' kcal', style: AppTheme.bodySmall),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => _removeFoodFromMeal(meal.type, food),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppTheme.error.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusSm,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.close_rounded,
+                              size: 16,
+                              color: AppTheme.error,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildMiniMacro(String label, double value, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '$label: ',
+          style: AppTheme.bodySmall.copyWith(
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Text('${value.toStringAsFixed(0)}g', style: AppTheme.bodySmall),
+      ],
+    );
+  }
+
+  LinearGradient _getMealColors(MealType type) {
+    switch (type) {
+      case MealType.breakfast:
+        return AppTheme.warmGradient;
+      case MealType.lunch:
+        return AppTheme.primaryGradient;
+      case MealType.dinner:
+        return AppTheme.purpleGradient;
+      case MealType.snack:
+        return AppTheme.accentGradient;
+    }
   }
 
   IconData _getMealIcon(MealType type) {
     switch (type) {
       case MealType.breakfast:
-        return Icons.free_breakfast;
+        return Icons.free_breakfast_rounded;
       case MealType.lunch:
-        return Icons.lunch_dining;
+        return Icons.lunch_dining_rounded;
       case MealType.dinner:
-        return Icons.dinner_dining;
+        return Icons.dinner_dining_rounded;
       case MealType.snack:
-        return Icons.cookie;
+        return Icons.cookie_rounded;
     }
   }
 }
