@@ -1,7 +1,6 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
+# --------------------------------------------------------------------------
+# 1. System/Editor Specific Files
+# --------------------------------------------------------------------------
 *.swp
 .DS_Store
 .atom/
@@ -18,53 +17,63 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# Node.js (should not be in Flutter project)
+# Node.js related (Standard exclusions)
 node_modules/
 package.json
 package-lock.json
 npm-debug.log
 yarn-error.log
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# --------------------------------------------------------------------------
+# 2. Dart/Flutter/Pub Build Artifacts (Crucial for CI/CD and Cleanliness)
+# --------------------------------------------------------------------------
+# Dart build files and cache (Redundant entries removed)
 .dart_tool/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
+
+# Flutter output directories
 /build/
 /coverage/
 
-# Symbolication related
-app.*.symbols
+# Documentation and API files
+**/doc/api/
 
-# Obfuscation related
-app.*.map.json
+# iOS/Android Native Build Files
+**/ios/Flutter/.last_build_id
+/android/
+/ios/
 
-# Android Studio will place build artifacts here
+# Android Studio Artifacts (Redundant entries removed)
 /android/app/debug
 /android/app/profile
 /android/app/release
 
+# Generated code files
+*.g.dart
+*.freezed.dart
+
+# --------------------------------------------------------------------------
+# 3. Security, Logging, and Metadata
+# --------------------------------------------------------------------------
 # Sensitive Configuration Files
+.env
 **/firebase_options.dart
 api_keys.dart
 secrets.json
-.env
 
-# Archive artifacts
-*.zip
-
-# Firebase
+# Firebase Logging
 .firebase/
 firebase-debug.log
 firestore-debug.log
 
-# Generated files
-*.g.dart
-*.freezed.dart
+# Other artifacts
+*.zip
+*.log
+*.class
+*.pyc
+
+# Symbolication and Obfuscation
+app.*.symbols
+app.*.map.json
