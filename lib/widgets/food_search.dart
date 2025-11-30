@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../models/food_item.dart';
 import '../services/enhanced_api_service.dart';
-import '../services/api_config.dart';
+import 'package:diet_planner_app/services/api_config.dart';
 import '../services/food_database_service.dart';
 
 class FoodSearch extends StatefulWidget {
@@ -136,17 +136,17 @@ class _FoodSearchState extends State<FoodSearch> {
             padding: const EdgeInsets.all(12),
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF00B4D8).withValues(alpha: 0.1),
+              color: const Color(0xFF14B8A6).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: const Color(0xFF00B4D8).withValues(alpha: 0.3),
+                color: const Color(0xFF14B8A6).withValues(alpha: 0.3),
               ),
             ),
             child: Row(
               children: [
                 const Icon(
                   Icons.info_outline,
-                  color: Color(0xFF00B4D8),
+                  color: Color(0xFF14B8A6),
                   size: 20,
                 ),
                 const SizedBox(width: 12),

@@ -58,7 +58,7 @@ class ProgressScreen extends StatelessWidget {
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                 itemCount: days.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                separatorBuilder: (context, _) => const SizedBox(height: 16),
                 itemBuilder: (context, i) {
                   final d = days[i];
                   final cals = db.caloriesFor(d);

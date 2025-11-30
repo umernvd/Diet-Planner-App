@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/enhanced_api_service.dart';
-import '../services/api_config.dart';
+import 'package:diet_planner_app/services/api_config.dart';
 
 class RecipeScreenEnhanced extends StatefulWidget {
   const RecipeScreenEnhanced({super.key});
@@ -112,9 +112,9 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            const Color(0xFF00B4D8),
-            const Color(0xFF90E0EF).withValues(alpha: 0.2),
-            const Color(0xFFF8F9FA),
+            const Color(0xFF14B8A6),
+            const Color(0xFF5EEAD4).withValues(alpha: 0.2),
+            const Color(0xFFF0FDFA),
           ],
           stops: const [0.0, 0.3, 0.6],
         ),
@@ -162,7 +162,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                         hintText: 'Search recipes...',
                         prefixIcon: const Icon(
                           Icons.search,
-                          color: Color(0xFF00B4D8),
+                          color: Color(0xFF14B8A6),
                         ),
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
@@ -194,7 +194,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 scrollDirection: Axis.horizontal,
                 itemCount: categories.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                separatorBuilder: (context, _) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
                   final category = categories[index];
                   final isSelected = category == _selectedCategory;
@@ -204,7 +204,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                     selected: isSelected,
                     onSelected: (_) => _loadCategoryRecipes(category),
                     backgroundColor: Colors.white,
-                    selectedColor: const Color(0xFF00B4D8),
+                    selectedColor: const Color(0xFF14B8A6),
                     labelStyle: TextStyle(
                       color: isSelected ? Colors.white : Colors.black87,
                       fontWeight: isSelected
@@ -212,7 +212,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                           : FontWeight.normal,
                     ),
                     elevation: isSelected ? 4 : 0,
-                    shadowColor: const Color(0xFF00B4D8).withValues(alpha: 0.5),
+                    shadowColor: const Color(0xFF14B8A6).withValues(alpha: 0.5),
                   );
                 },
               ),
@@ -225,7 +225,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
               child: _loading
                   ? const Center(
                       child: CircularProgressIndicator(
-                        color: Color(0xFF00B4D8),
+                        color: Color(0xFF14B8A6),
                       ),
                     )
                   : _recipes.isEmpty
@@ -237,7 +237,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
                               color: const Color(
-                                0xFF90E0EF,
+                                0xFF5EEAD4,
                               ).withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
@@ -245,7 +245,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                               Icons.restaurant_menu_rounded,
                               size: 64,
                               color: const Color(
-                                0xFF00B4D8,
+                                0xFF14B8A6,
                               ).withValues(alpha: 0.5),
                             ),
                           ),
@@ -386,7 +386,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF00B4D8),
+                                color: const Color(0xFF14B8A6),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
@@ -536,7 +536,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                                 style: const TextStyle(fontSize: 12),
                               ),
                               backgroundColor: const Color(
-                                0xFF00B4D8,
+                                0xFF14B8A6,
                               ).withValues(alpha: 0.1),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -550,7 +550,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                                 style: const TextStyle(fontSize: 12),
                               ),
                               backgroundColor: const Color(
-                                0xFF90E0EF,
+                                0xFF5EEAD4,
                               ).withValues(alpha: 0.1),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -577,7 +577,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF00B4D8),
+                            color: Color(0xFF14B8A6),
                           ),
                         ),
                       ),
@@ -591,7 +591,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                                 const Icon(
                                   Icons.fiber_manual_record,
                                   size: 8,
-                                  color: Color(0xFF00B4D8),
+                                  color: Color(0xFF14B8A6),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -611,7 +611,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                                 const Icon(
                                   Icons.fiber_manual_record,
                                   size: 8,
-                                  color: Color(0xFF00B4D8),
+                                  color: Color(0xFF14B8A6),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -642,7 +642,7 @@ class _RecipeScreenEnhancedState extends State<RecipeScreenEnhanced> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF00B4D8),
+                          color: Color(0xFF14B8A6),
                         ),
                       ),
                     ),

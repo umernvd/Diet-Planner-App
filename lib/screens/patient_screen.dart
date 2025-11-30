@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:developer' as developer;
 import '../services/huggingface_ai_service.dart';
 
 class PatientScreen extends StatefulWidget {
@@ -72,7 +73,7 @@ class _PatientScreenState extends State<PatientScreen> {
           }
         }
       } catch (e) {
-        print('AI service error: $e');
+        developer.log('AI service error', error: e);
       }
 
       // Fallback to predefined recipes based on disease
@@ -393,9 +394,9 @@ class _PatientScreenState extends State<PatientScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            const Color(0xFF00B4D8),
-            const Color(0xFF90E0EF).withValues(alpha: 0.2),
-            const Color(0xFFF8F9FA),
+            const Color(0xFF14B8A6),
+            const Color(0xFF5EEAD4).withValues(alpha: 0.2),
+            const Color(0xFFF0FDFA),
           ],
           stops: const [0.0, 0.3, 0.6],
         ),
@@ -480,34 +481,48 @@ class _PatientScreenState extends State<PatientScreen> {
                                 const SizedBox(height: 16),
 
                                 // Dropdown for common diseases
-                                DropdownButtonFormField<String>(
-                                  value: _selectedDisease,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Select from common conditions',
-                                    prefixIcon: Icon(
-                                      Icons.local_hospital_outlined,
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: DropdownButtonFormField<String?>(
+                                    initialValue: _selectedDisease,
+                                    isExpanded: true,
+                                    decoration: const InputDecoration(
+                                      labelText:
+                                          'Select from common conditions',
+                                      prefixIcon: Icon(
+                                        Icons.local_hospital_outlined,
+                                      ),
                                     ),
+                                    items: [
+                                      const DropdownMenuItem<String?>(
+                                        value: null,
+                                        child: SizedBox(
+                                          width: double.infinity,
+                                          child: Text(
+                                            'Select a condition...',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ),
+                                      ..._commonDiseases
+                                          .map<DropdownMenuItem<String?>>((
+                                            disease,
+                                          ) {
+                                            return DropdownMenuItem<String?>(
+                                              value: disease,
+                                              child: Text(disease),
+                                            );
+                                          }),
+                                    ],
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedDisease = value;
+                                        if (value != null) {
+                                          _diseaseController.text = value;
+                                        }
+                                      });
+                                    },
                                   ),
-                                  items: [
-                                    const DropdownMenuItem(
-                                      value: null,
-                                      child: Text('Select a condition...'),
-                                    ),
-                                    ..._commonDiseases.map((disease) {
-                                      return DropdownMenuItem(
-                                        value: disease,
-                                        child: Text(disease),
-                                      );
-                                    }),
-                                  ],
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedDisease = value;
-                                      if (value != null) {
-                                        _diseaseController.text = value;
-                                      }
-                                    });
-                                  },
                                 ),
                                 const SizedBox(height: 16),
 
@@ -623,12 +638,12 @@ class _PatientScreenState extends State<PatientScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00B4D8).withValues(alpha: 0.1),
+                      color: const Color(0xFF14B8A6).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
                       Icons.restaurant,
-                      color: Color(0xFF00B4D8),
+                      color: Color(0xFF14B8A6),
                       size: 24,
                     ),
                   ),
@@ -917,19 +932,19 @@ class _PatientScreenState extends State<PatientScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF00B4D8).withValues(alpha: 0.1),
+        color: const Color(0xFF14B8A6).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: const Color(0xFF00B4D8)),
+          Icon(icon, size: 16, color: const Color(0xFF14B8A6)),
           const SizedBox(width: 4),
           Text(
             label,
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFF00B4D8),
+              color: Color(0xFF14B8A6),
               fontWeight: FontWeight.w600,
             ),
           ),

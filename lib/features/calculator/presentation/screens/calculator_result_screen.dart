@@ -21,7 +21,7 @@ class CalculatorResultScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Personal Plan'),
-        backgroundColor: const Color(0xFF00B4D8),
+        backgroundColor: const Color(0xFF14B8A6),
         foregroundColor: Colors.white,
       ),
       body: ListView(

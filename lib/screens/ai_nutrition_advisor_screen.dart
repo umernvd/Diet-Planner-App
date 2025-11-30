@@ -119,7 +119,7 @@ class _AINutritionAdvisorScreenState extends State<AINutritionAdvisorScreen> {
             Text('AI Nutrition Advisor'),
           ],
         ),
-        backgroundColor: const Color(0xFF00B4D8),
+        backgroundColor: const Color(0xFF14B8A6),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -129,7 +129,7 @@ class _AINutritionAdvisorScreenState extends State<AINutritionAdvisorScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF90E0EF).withValues(alpha: 0.1),
+              color: const Color(0xFF5EEAD4).withValues(alpha: 0.1),
               border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
             ),
             child: SingleChildScrollView(
@@ -193,7 +193,7 @@ class _AINutritionAdvisorScreenState extends State<AINutritionAdvisorScreen> {
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        const Color(0xFF00B4D8),
+                        const Color(0xFF14B8A6),
                       ),
                     ),
                   ),
@@ -249,7 +249,7 @@ class _AINutritionAdvisorScreenState extends State<AINutritionAdvisorScreen> {
                   Container(
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFF00B4D8), Color(0xFF90E0EF)],
+                        colors: [Color(0xFF14B8A6), Color(0xFF5EEAD4)],
                       ),
                       shape: BoxShape.circle,
                     ),
@@ -277,8 +277,8 @@ class _AINutritionAdvisorScreenState extends State<AINutritionAdvisorScreen> {
           _sendMessage();
         },
         backgroundColor: Colors.white,
-        side: BorderSide(color: const Color(0xFF00B4D8).withValues(alpha: 0.3)),
-        labelStyle: const TextStyle(color: Color(0xFF00B4D8), fontSize: 13),
+        side: BorderSide(color: const Color(0xFF14B8A6).withValues(alpha: 0.3)),
+        labelStyle: const TextStyle(color: Color(0xFF14B8A6), fontSize: 13),
       ),
     );
   }
@@ -294,7 +294,7 @@ class _AINutritionAdvisorScreenState extends State<AINutritionAdvisorScreen> {
         ),
         decoration: BoxDecoration(
           color: message.isUser
-              ? const Color(0xFF00B4D8)
+              ? const Color(0xFF14B8A6)
               : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(20).copyWith(
             bottomRight: message.isUser ? const Radius.circular(4) : null,
@@ -317,7 +317,7 @@ class _AINutritionAdvisorScreenState extends State<AINutritionAdvisorScreen> {
                   Icon(
                     Icons.psychology_rounded,
                     size: 16,
-                    color: const Color(0xFF00B4D8),
+                    color: const Color(0xFF14B8A6),
                   ),
                   const SizedBox(width: 6),
                   Text(

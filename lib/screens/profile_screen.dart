@@ -6,6 +6,7 @@ import '../services/meal_plan_service.dart';
 import '../widgets/animated_widgets.dart';
 import '../widgets/modern_card.dart';
 import 'auth/login_screen.dart';
+import 'home_screen_new.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -339,9 +340,34 @@ class ProfileScreen extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      await auth.signOut();
-      FoodDatabaseService.instance.clearCache();
-      MealPlanService.instance.clearAll();
+      try {
+        await auth.signOut();
+        FoodDatabaseService.instance.clearCache();
+        MealPlanService.instance.clearAll();
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Signed out successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Refresh the home screen so UI reflects signed-out state
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const HomeScreenRedesigned()),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error signing out: $e'),
+              backgroundColor: AppTheme.error,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -378,6 +404,20 @@ class ProfileScreen extends StatelessWidget {
         await auth.deleteAccount();
         FoodDatabaseService.instance.clearCache();
         MealPlanService.instance.clearAll();
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Account deleted'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Refresh the home screen to show guest state
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const HomeScreenRedesigned()),
+          );
+        }
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

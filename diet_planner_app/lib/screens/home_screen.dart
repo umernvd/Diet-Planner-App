@@ -338,7 +338,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (_, i) => _StatCard(statItems[i]),
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                separatorBuilder: (context, _) => const SizedBox(width: 12),
                 itemCount: statItems.length,
               ),
             ),

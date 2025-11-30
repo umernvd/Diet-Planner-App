@@ -7,37 +7,41 @@ class AppTheme {
   AppTheme._();
 
   // ═══════════════════════════════════════════════════════════════════
-  // 🎨 BRAND COLORS - Modern & Fresh Palette
+  // 🎨 BRAND COLORS - Fresh & Healthy Palette
   // ═══════════════════════════════════════════════════════════════════
 
-  // Primary - Vibrant Purple/Blue Gradient
-  static const Color primary = Color(0xFF6366F1); // Vibrant Indigo
-  static const Color primaryLight = Color(0xFF818CF8); // Light Indigo
-  static const Color primaryDark = Color(0xFF4F46E5); // Deep Indigo
-  static const Color primarySoft = Color(0xFFE0E7FF); // Very Light Indigo
+  // Primary - Fresh Teal (Healthy, Clean, Trustworthy)
+  static const Color primary = Color(0xFF14B8A6); // Vibrant Teal
+  static const Color primaryLight = Color(0xFF5EEAD4); // Light Teal
+  static const Color primaryDark = Color(0xFF0F766E); // Deep Teal
+  static const Color primarySoft = Color(0xFFCCFBF1); // Very Light Teal
 
   // Accent Colors
-  static const Color accent = Color(0xFF10B981); // Emerald Green
-  static const Color accentWarm = Color(0xFFF59E0B); // Amber
-  static const Color accentRose = Color(0xFFEC4899); // Pink
-  static const Color accentPurple = Color(0xFF8B5CF6); // Purple
+  static const Color accent = Color(
+    0xFF84CC16,
+  ); // Lime Green (Vitality, Growth)
+  static const Color accentWarm = Color(
+    0xFFF97316,
+  ); // Orange (Energy, Motivation)
+  static const Color accentRose = Color(0xFFEC4899); // Pink (Joy, Balance)
+  static const Color accentPurple = Color(
+    0xFF8B5CF6,
+  ); // Purple (Creativity, AI)
 
-  // Neutrals
-  static const Color background = Color(
-    0xFFFAFAFC,
-  ); // Subtle lavender-tinted white
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceVariant = Color(0xFFF5F3FF); // Light purple tint
-  static const Color textPrimary = Color(0xFF0F172A); // Slate dark
-  static const Color textSecondary = Color(0xFF475569); // Slate medium
-  static const Color textTertiary = Color(0xFF94A3B8); // Slate light
-  static const Color divider = Color(0xFFE2E8F0); // Slate very light
+  // Neutrals - Clean and Modern
+  static const Color background = Color(0xFFF0FDFA); // Very Light Teal Tint
+  static const Color surface = Color(0xFFFFFFFF); // Pure White
+  static const Color surfaceVariant = Color(0xFFF1F5F9); // Soft Gray-Blue
+  static const Color textPrimary = Color(0xFF0F172A); // Dark Slate
+  static const Color textSecondary = Color(0xFF475569); // Medium Slate
+  static const Color textTertiary = Color(0xFF64748B); // Light Slate
+  static const Color divider = Color(0xFFE2E8F0); // Soft Gray
 
-  // Status Colors
-  static const Color success = Color(0xFF10B981); // Emerald
-  static const Color warning = Color(0xFFF59E0B); // Amber
-  static const Color error = Color(0xFFEF4444); // Red
-  static const Color info = Color(0xFF3B82F6); // Blue
+  // Status Colors - Intuitive and Calming
+  static const Color success = Color(0xFF22C55E); // Fresh Green
+  static const Color warning = Color(0xFFF59E0B); // Warm Amber
+  static const Color error = Color(0xFFEF4444); // Soft Red
+  static const Color info = Color(0xFF3B82F6); // Friendly Blue
 
   // ═══════════════════════════════════════════════════════════════════
   // 🌈 GRADIENTS
@@ -46,19 +50,19 @@ class AppTheme {
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)], // Indigo to Purple
+    colors: [Color(0xFF14B8A6), Color(0xFF5EEAD4)], // Teal to Light Teal
   );
 
   static const LinearGradient accentGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF10B981), Color(0xFF34D399)], // Emerald gradient
+    colors: [Color(0xFF84CC16), Color(0xFFA3E635)], // Lime Green gradient
   );
 
   static const LinearGradient warmGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFF59E0B), Color(0xFFFBBF24)], // Amber gradient
+    colors: [Color(0xFFF97316), Color(0xFFFB923C)], // Orange gradient
   );
 
   static const LinearGradient warningGradient = LinearGradient(
@@ -83,9 +87,9 @@ class AppTheme {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF6366F1), // Indigo
-      Color(0xFF8B5CF6), // Purple
-      Color(0xFFEC4899), // Pink
+      Color(0xFF14B8A6), // Teal
+      Color(0xFF84CC16), // Lime Green
+      Color(0xFFF97316), // Orange
     ],
     stops: const [0.0, 0.5, 1.0],
   );

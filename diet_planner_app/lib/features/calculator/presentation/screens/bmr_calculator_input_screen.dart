@@ -225,7 +225,7 @@ class _BmrCalculatorInputScreenState extends State<BmrCalculatorInputScreen> {
         _sectionLabel('Activity Level'),
         const SizedBox(height: 8),
         DropdownButtonFormField<ActivityLevel>(
-          value: _controller.activityLevel,
+          initialValue: _controller.activityLevel,
           decoration: _inputDecoration(null, null),
           items: ActivityLevel.values
               .map(

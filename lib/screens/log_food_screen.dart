@@ -153,12 +153,12 @@ class _LogFoodScreenState extends State<LogFoodScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF00B4D8).withValues(alpha: 0.1),
+                color: const Color(0xFF14B8A6).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
                 Icons.check_circle_outline,
-                color: Color(0xFF00B4D8),
+                color: Color(0xFF14B8A6),
                 size: 32,
               ),
             ),
@@ -184,7 +184,7 @@ class _LogFoodScreenState extends State<LogFoodScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00B4D8).withValues(alpha: 0.05),
+                  color: const Color(0xFF14B8A6).withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -423,7 +423,7 @@ class _LogFoodScreenState extends State<LogFoodScreen> {
                     Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Color(0xFF00B4D8), Color(0xFF90E0EF)],
+                          colors: [Color(0xFF14B8A6), Color(0xFF5EEAD4)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),

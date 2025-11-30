@@ -11,6 +11,8 @@ class ApiConfig {
   static const bool showApiSource = true;
 
   // --- API Keys from environment variables ---
+  // These return `null` by default. Set them in your build or replace
+  // with real values during local development. Avoid committing secrets.
   static String? get calorieNinjasApiKey => null;
 
   static String? get edamamAppId => null;

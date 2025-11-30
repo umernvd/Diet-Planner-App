@@ -15,8 +15,8 @@ class AnimatedProgressRing extends StatefulWidget {
     required this.progress,
     this.size = 120,
     this.strokeWidth = 12,
-    this.startColor = const Color(0xFF00B4D8),
-    this.endColor = const Color(0xFF90E0EF),
+    this.startColor = const Color(0xFF14B8A6),
+    this.endColor = const Color(0xFF5EEAD4),
     this.child,
   });
 
@@ -36,9 +36,10 @@ class _AnimatedProgressRingState extends State<AnimatedProgressRing>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    _animation = Tween<double>(begin: 0, end: widget.progress).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
+    _animation = Tween<double>(
+      begin: 0,
+      end: widget.progress,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _controller.forward();
   }
 
@@ -46,12 +47,10 @@ class _AnimatedProgressRingState extends State<AnimatedProgressRing>
   void didUpdateWidget(AnimatedProgressRing oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.progress != widget.progress) {
-      _animation = Tween<double>(
-        begin: _animation.value,
-        end: widget.progress,
-      ).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-      );
+      _animation = Tween<double>(begin: _animation.value, end: widget.progress)
+          .animate(
+            CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+          );
       _controller.forward(from: 0);
     }
   }

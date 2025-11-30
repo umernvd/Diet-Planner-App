@@ -83,13 +83,13 @@ class _AIFoodParserState extends State<AIFoodParser> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF00B4D8).withValues(alpha: 0.1),
-            const Color(0xFF90E0EF).withValues(alpha: 0.05),
+            const Color(0xFF14B8A6).withValues(alpha: 0.1),
+            const Color(0xFF5EEAD4).withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF00B4D8).withValues(alpha: 0.3),
+          color: const Color(0xFF14B8A6).withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -101,7 +101,7 @@ class _AIFoodParserState extends State<AIFoodParser> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00B4D8),
+                  color: const Color(0xFF14B8A6),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -243,7 +243,7 @@ class _AIFoodParserState extends State<AIFoodParser> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 14, color: const Color(0xFF00B4D8)),
+            Icon(icon, size: 14, color: const Color(0xFF14B8A6)),
             const SizedBox(width: 6),
             Text(
               text,

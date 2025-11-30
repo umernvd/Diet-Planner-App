@@ -395,7 +395,8 @@ class GradientAvatar extends StatelessWidget {
                 ? Image.network(
                     imageUrl!,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _buildInitials(),
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildInitials(),
                   )
                 : _buildInitials(),
           ),

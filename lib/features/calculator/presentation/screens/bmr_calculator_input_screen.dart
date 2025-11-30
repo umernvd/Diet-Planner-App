@@ -34,7 +34,7 @@ class _BmrCalculatorInputScreenState extends State<BmrCalculatorInputScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('BMR & TDEE Calculator'),
-        backgroundColor: const Color(0xFF00B4D8),
+        backgroundColor: const Color(0xFF14B8A6),
         foregroundColor: Colors.white,
       ),
       body: AnimatedBuilder(
@@ -65,7 +65,7 @@ class _BmrCalculatorInputScreenState extends State<BmrCalculatorInputScreen> {
                       onPressed: _handleCalculate,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: const Color(0xFF00B4D8),
+                        backgroundColor: const Color(0xFF14B8A6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -93,7 +93,7 @@ class _BmrCalculatorInputScreenState extends State<BmrCalculatorInputScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF00B4D8), Color(0xFF90E0EF)],
+          colors: [Color(0xFF14B8A6), Color(0xFF5EEAD4)],
         ),
         borderRadius: BorderRadius.circular(20),
       ),
@@ -225,7 +225,7 @@ class _BmrCalculatorInputScreenState extends State<BmrCalculatorInputScreen> {
         _sectionLabel('Activity Level'),
         const SizedBox(height: 8),
         DropdownButtonFormField<ActivityLevel>(
-          value: _controller.activityLevel,
+          initialValue: _controller.activityLevel,
           decoration: _inputDecoration(null, null),
           items: ActivityLevel.values
               .map(

@@ -4,7 +4,6 @@ import '../../services/firebase_auth_service.dart';
 import '../../services/food_database_service.dart';
 import '../../services/meal_plan_service.dart';
 import 'signup_screen.dart';
-import '../home_screen_redesigned.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,9 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await _loadUserData();
 
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreenRedesigned()),
-        );
+        Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -78,9 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await _loadUserData();
 
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreenRedesigned()),
-        );
+        Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -159,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF00B4D8), Color(0xFF90E0EF)],
+            colors: [Color(0xFF14B8A6), Color(0xFF5EEAD4)],
           ),
         ),
         child: SafeArea(
@@ -186,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Icon(
                       Icons.restaurant_menu_rounded,
                       size: 64,
-                      color: Color(0xFF00B4D8),
+                      color: Color(0xFF14B8A6),
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -398,11 +393,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Skip Sign In
                   TextButton(
                     onPressed: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (_) => const HomeScreenRedesigned(),
-                        ),
-                      );
+                      Navigator.of(context).pop();
                     },
                     child: Text(
                       'Continue without signing in',

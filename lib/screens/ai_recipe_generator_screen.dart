@@ -111,7 +111,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
             Text('AI Recipe Generator'),
           ],
         ),
-        backgroundColor: const Color(0xFF00B4D8),
+        backgroundColor: const Color(0xFF14B8A6),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -130,7 +130,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF00B4D8), Color(0xFF90E0EF)],
+                colors: [Color(0xFF14B8A6), Color(0xFF5EEAD4)],
               ),
               borderRadius: BorderRadius.circular(16),
             ),
@@ -213,7 +213,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
                   deleteIcon: const Icon(Icons.close, size: 18),
                   onDeleted: () => _removeIngredient(entry.key),
                   backgroundColor: const Color(
-                    0xFF90E0EF,
+                    0xFF5EEAD4,
                   ).withValues(alpha: 0.2),
                 );
               }).toList(),
@@ -356,7 +356,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF00B4D8), Color(0xFF90E0EF)],
+                colors: [Color(0xFF14B8A6), Color(0xFF5EEAD4)],
               ),
             ),
             child: Stack(
@@ -444,7 +444,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF90E0EF).withValues(alpha: 0.1),
+                    color: const Color(0xFF5EEAD4).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -486,7 +486,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
                         const Icon(
                           Icons.check_circle_rounded,
                           size: 20,
-                          color: Color(0xFF00B4D8),
+                          color: Color(0xFF14B8A6),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -521,7 +521,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
                               width: 32,
                               height: 32,
                               decoration: const BoxDecoration(
-                                color: Color(0xFF00B4D8),
+                                color: Color(0xFF14B8A6),
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
@@ -643,7 +643,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: const Color(0xFF00B4D8)),
+          Icon(icon, size: 16, color: const Color(0xFF14B8A6)),
           const SizedBox(width: 6),
           Text(text, style: const TextStyle(fontSize: 13)),
         ],

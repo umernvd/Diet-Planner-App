@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/firebase_auth_service.dart';
 import '../../services/food_database_service.dart';
 import '../../services/meal_plan_service.dart';
-import '../home_screen_redesigned.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -54,10 +53,8 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         );
 
-        // Navigate to home
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreenRedesigned()),
-        );
+        // Return to previous screen (Home is already underneath)
+        Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -97,10 +94,8 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         );
 
-        // Navigate to home
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreenRedesigned()),
-        );
+        // Return to previous screen (Home is already underneath)
+        Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -148,7 +143,7 @@ class _SignupScreenState extends State<SignupScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF00B4D8), Color(0xFF90E0EF)],
+            colors: [Color(0xFF14B8A6), Color(0xFF5EEAD4)],
           ),
         ),
         child: SafeArea(
@@ -175,7 +170,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: const Icon(
                       Icons.restaurant_menu_rounded,
                       size: 64,
-                      color: Color(0xFF00B4D8),
+                      color: Color(0xFF14B8A6),
                     ),
                   ),
                   const SizedBox(height: 32),

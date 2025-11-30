@@ -143,7 +143,7 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
               onDestinationSelected: (i) => setState(() => _index = i),
               backgroundColor: Colors.transparent,
               elevation: 0,
-              indicatorColor: const Color(0xFF00B4D8).withValues(alpha: 0.1),
+              indicatorColor: const Color(0xFF14B8A6).withValues(alpha: 0.1),
               labelBehavior:
                   NavigationDestinationLabelBehavior.onlyShowSelected,
               destinations: const [
@@ -222,9 +222,9 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            const Color(0xFF00B4D8),
-            const Color(0xFF90E0EF).withValues(alpha: 0.3),
-            const Color(0xFFF8F9FA),
+            const Color(0xFF14B8A6),
+            const Color(0xFF5EEAD4).withValues(alpha: 0.3),
+            const Color(0xFFF0FDFA),
           ],
           stops: const [0.0, 0.4, 0.7],
         ),
@@ -282,7 +282,7 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                                   ? _userName[0].toUpperCase()
                                   : '?',
                               style: const TextStyle(
-                                color: Color(0xFF00B4D8),
+                                color: Color(0xFF14B8A6),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 24,
                               ),
@@ -325,8 +325,8 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                               progress: calorieProgress,
                               size: 200,
                               strokeWidth: 16,
-                              startColor: const Color(0xFF00B4D8),
-                              endColor: const Color(0xFF90E0EF),
+                              startColor: const Color(0xFF14B8A6),
+                              endColor: const Color(0xFF5EEAD4),
                             ),
                             Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -336,7 +336,7 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                                   style: theme.textTheme.displayMedium
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: const Color(0xFF00B4D8),
+                                        color: const Color(0xFF14B8A6),
                                       ),
                                 ),
                                 Text(
@@ -353,14 +353,14 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                                   ),
                                   decoration: BoxDecoration(
                                     color: const Color(
-                                      0xFF90E0EF,
+                                      0xFF5EEAD4,
                                     ).withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
                                     '${targetCalories.toStringAsFixed(0)} goal',
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: const Color(0xFF00B4D8),
+                                      color: const Color(0xFF14B8A6),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -430,7 +430,7 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                       children: [
                         const Icon(
                           Icons.auto_awesome_rounded,
-                          color: Color(0xFF00B4D8),
+                          color: Color(0xFF14B8A6),
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -450,7 +450,7 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                             'AI Advisor',
                             'Get nutrition advice',
                             Icons.psychology_rounded,
-                            const Color(0xFF00B4D8),
+                            const Color(0xFF14B8A6),
                             () {
                               Navigator.push(
                                 context,
@@ -468,7 +468,7 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                             'Recipe Gen',
                             'Create recipes',
                             Icons.auto_awesome_rounded,
-                            const Color(0xFF06D6A0),
+                            const Color(0xFF84CC16),
                             () {
                               Navigator.push(
                                 context,
@@ -487,7 +487,7 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                       'BMR Calculator',
                       'Calculate your daily calorie needs',
                       Icons.local_fire_department_rounded,
-                      const Color(0xFFFFB703),
+                      const Color(0xFFF97316),
                       () {
                         Navigator.push(
                           context,
@@ -522,7 +522,7 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                       icon: const Icon(Icons.add_rounded, size: 20),
                       label: const Text('Add'),
                       style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF00B4D8),
+                        foregroundColor: const Color(0xFF14B8A6),
                       ),
                     ),
                   ],
@@ -622,13 +622,13 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF90E0EF).withValues(alpha: 0.1),
+                    color: const Color(0xFF5EEAD4).withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.restaurant_rounded,
                     size: 64,
-                    color: const Color(0xFF00B4D8).withValues(alpha: 0.5),
+                    color: const Color(0xFF14B8A6).withValues(alpha: 0.5),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -699,7 +699,7 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                     height: 56,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF00B4D8), Color(0xFF90E0EF)],
+                        colors: [Color(0xFF14B8A6), Color(0xFF5EEAD4)],
                       ),
                       borderRadius: BorderRadius.circular(16),
                     ),

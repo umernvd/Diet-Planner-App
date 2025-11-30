@@ -67,7 +67,7 @@ class CalorieSummary extends StatelessWidget {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: recentFoods.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  separatorBuilder: (context, _) => const SizedBox(width: 8),
                   itemBuilder: (context, i) {
                     final f = recentFoods[i];
                     return Chip(

@@ -6,7 +6,7 @@ import 'package:logger/logger.dart';
 
 import '../models/food_item.dart';
 
-final Logger _logger = Logger();
+final Logger _defaultLogger = Logger();
 
 /// Enhanced API Service with multiple public nutrition and recipe APIs
 /// All APIs used are FREE and publicly accessible
@@ -21,125 +21,210 @@ final Logger _logger = Logger();
 /// - Data validation (positive values, non-empty names)
 /// - Better null safety throughout
 class EnhancedApiService {
-  EnhancedApiService._private();
-  static final EnhancedApiService instance = EnhancedApiService._private();
-  final http.Client _http = http.Client();
+  /// Creates an instance of [EnhancedApiService]. You may provide a custom
+  /// `http.Client` (useful for tests) and a `Logger` instance.
+  EnhancedApiService({
+    http.Client? client,
+    Logger? logger,
+    List<String>? corsProxies,
+  }) : _http = client ?? http.Client(),
+       _logger = logger ?? _defaultLogger,
+       _corsProxies = corsProxies ?? _corsProxiesDefault,
+       _ownsClient = client == null;
+
+  /// Convenient singleton instance for quick use. For production code prefer
+  /// injecting an instance (so it can be mocked in tests).
+  static final EnhancedApiService instance = EnhancedApiService();
+
+  final http.Client _http;
+  final Logger _logger;
+  final List<String> _corsProxies;
+  final bool _ownsClient;
+  // CORS proxies to try when running on web
+  static const List<String> _corsProxiesDefault = [
+    'https://corsproxy.io/?',
+    'https://api.allorigins.win/raw?url=',
+    'https://thingproxy.freeboard.io/fetch/',
+  ];
+
+  static const Duration _defaultTimeout = Duration(seconds: 20);
+  static const int _defaultMaxRetries = 3;
+
+  bool get _shouldCloseClient => _ownsClient;
 
   // OpenFoodFacts search with retry logic and relevance filtering
   Future<List<FoodItem>> searchOpenFoodFacts(
     String query, {
-    int retries = 2,
+    int retries = _defaultMaxRetries,
+    bool forceDirect = false,
   }) async {
     final q = query.trim().toLowerCase();
     if (q.isEmpty) return [];
 
-    for (int attempt = 0; attempt <= retries; attempt++) {
+    // Build base URL
+    final baseUrl =
+        'https://world.openfoodfacts.org/cgi/search.pl?search_terms=${Uri.encodeComponent(query)}&search_simple=1&action=process&json=1&page_size=50';
+
+    // If running on web, try direct first (may work in dev) then proxy fallbacks
+    if (kIsWeb && !forceDirect) {
+      // Try direct first on web (may fail due to CORS).
       try {
-        String urlStr =
-            'https://world.openfoodfacts.org/cgi/search.pl?search_terms=${Uri.encodeComponent(query)}&search_simple=1&action=process&json=1&page_size=50';
-        if (kIsWeb) {
-          urlStr = 'https://corsproxy.io/?${Uri.encodeComponent(urlStr)}';
-        }
-        final uri = Uri.parse(urlStr);
-        _logger.d('Searching OpenFoodFacts (attempt ${attempt + 1}): $uri');
-
-        final resp = await _http
-            .get(uri)
-            .timeout(
-              const Duration(seconds: 20),
-              onTimeout: () =>
-                  throw TimeoutException('Search request timed out'),
-            );
-
-        if (resp.statusCode == 200) {
-          final json = jsonDecode(resp.body) as Map<String, dynamic>;
+        final directUri = Uri.parse(baseUrl);
+        _logger.d('Searching OpenFoodFacts (direct): $directUri');
+        final directResp = await _getWithRetries(
+          directUri,
+          timeout: const Duration(seconds: 5),
+          maxRetries: 0,
+        );
+        if (directResp != null && directResp.statusCode == 200) {
+          _logger.i('Direct OpenFoodFacts request succeeded');
+          final json = jsonDecode(directResp.body) as Map<String, dynamic>;
           final products = (json['products'] as List<dynamic>?) ?? [];
-
-          // Parse all products
-          final allItems = products
+          return products
               .map((p) => _foodItemFromOpenFoodFacts(p as Map<String, dynamic>))
               .whereType<FoodItem>()
               .where((item) => item.name.isNotEmpty && item.calories >= 0)
               .toList();
-
-          // Score and filter by relevance
-          final queryWords = q.split(' ').where((w) => w.isNotEmpty).toList();
-          final scoredItems = allItems
-              .map((item) {
-                final itemName = item.name.toLowerCase();
-                double score = 0;
-
-                // Exact match gets highest score
-                if (itemName == q) {
-                  score = 100;
-                }
-                // Starts with query
-                else if (itemName.startsWith(q)) {
-                  score = 90;
-                }
-                // Contains exact query
-                else if (itemName.contains(q)) {
-                  score = 80;
-                }
-                // All query words present
-                else {
-                  int matchedWords = 0;
-                  for (final word in queryWords) {
-                    if (itemName.contains(word)) {
-                      matchedWords++;
-                      score += 10;
-                    }
-                  }
-                  // Bonus if all words matched
-                  if (matchedWords == queryWords.length) {
-                    score += 20;
-                  }
-                }
-
-                // Penalty for very long names (likely less relevant)
-                if (itemName.length > q.length * 3) {
-                  score -= 10;
-                }
-
-                return {'item': item, 'score': score};
-              })
-              .where((entry) => entry['score'] as double > 0)
-              .toList();
-
-          // Sort by score descending
-          scoredItems.sort(
-            (a, b) => (b['score'] as double).compareTo(a['score'] as double),
-          );
-
-          // Return top 20 most relevant results
-          final items = scoredItems
-              .take(20)
-              .map((entry) => entry['item'] as FoodItem)
-              .toList();
-
-          _logger.i(
-            'Found ${items.length} relevant items from OpenFoodFacts (filtered from ${allItems.length})',
-          );
-          return items;
-        } else if (resp.statusCode == 429) {
-          // Rate limited - wait before retry
-          await Future.delayed(Duration(seconds: attempt + 1));
-          continue;
-        } else {
-          _logger.w('OpenFoodFacts returned status ${resp.statusCode}');
-          if (attempt == retries) return [];
         }
+      } catch (e, st) {
+        _logger.w(
+          'Direct OpenFoodFacts request failed, will try proxies: $e',
+          error: e,
+          stackTrace: st,
+        );
+      }
+    }
+
+    // Prepare proxy candidate list (web only)
+    final proxyCandidates = <String>[];
+    if (kIsWeb) {
+      for (final proxy in _corsProxies) {
+        if (proxy.contains('allorigins')) {
+          proxyCandidates.add('$proxy${Uri.encodeComponent(baseUrl)}');
+        } else {
+          proxyCandidates.add('$proxy$baseUrl');
+        }
+      }
+    } else {
+      proxyCandidates.add(baseUrl);
+    }
+
+    // Try proxies with retries using centralized GET helper
+    for (final urlStr in proxyCandidates) {
+      final uri = Uri.parse(urlStr);
+      try {
+        final resp = await _getWithRetries(
+          uri,
+          timeout: kIsWeb ? const Duration(seconds: 45) : _defaultTimeout,
+          maxRetries: retries,
+        );
+        if (resp == null) continue;
+        if (resp.statusCode != 200) {
+          _logger.w('OpenFoodFacts returned status ${resp.statusCode}');
+          continue;
+        }
+
+        final json = jsonDecode(resp.body) as Map<String, dynamic>;
+        final products = (json['products'] as List<dynamic>?) ?? [];
+
+        // Parse all products
+        final allItems = products
+            .map((p) => _foodItemFromOpenFoodFacts(p as Map<String, dynamic>))
+            .whereType<FoodItem>()
+            .where((item) => item.name.isNotEmpty && item.calories >= 0)
+            .toList();
+
+        // Score and filter by relevance
+        final queryWords = q.split(' ').where((w) => w.isNotEmpty).toList();
+        final scoredItems = allItems
+            .map((item) {
+              final itemName = item.name.toLowerCase();
+              double score = 0;
+
+              if (itemName == q) {
+                score = 100;
+              } else if (itemName.startsWith(q)) {
+                score = 90;
+              } else if (itemName.contains(q)) {
+                score = 80;
+              } else {
+                int matchedWords = 0;
+                for (final word in queryWords) {
+                  if (itemName.contains(word)) {
+                    matchedWords++;
+                    score += 10;
+                  }
+                }
+                if (matchedWords == queryWords.length) score += 20;
+              }
+
+              if (itemName.length > q.length * 3) score -= 10;
+
+              return {'item': item, 'score': score};
+            })
+            .where((entry) => (entry['score'] as double) > 0)
+            .toList();
+
+        scoredItems.sort(
+          (a, b) => (b['score'] as double).compareTo(a['score'] as double),
+        );
+
+        final items = scoredItems
+            .take(20)
+            .map((e) => e['item'] as FoodItem)
+            .toList();
+
+        _logger.i(
+          'Found ${items.length} relevant items from OpenFoodFacts (filtered from ${allItems.length})',
+        );
+        return items;
       } catch (e, stackTrace) {
         _logger.e(
-          'OpenFoodFacts error (attempt ${attempt + 1}): $e',
+          'OpenFoodFacts error for $uri: $e',
           error: e,
           stackTrace: stackTrace,
         );
-        if (attempt == retries) return [];
+        // try next proxy candidate
+      }
+    }
+
+    return [];
+  }
+
+  /// Centralized GET with retries, timeouts and basic backoff handling.
+  Future<http.Response?> _getWithRetries(
+    Uri uri, {
+    Duration? timeout,
+    int maxRetries = _defaultMaxRetries,
+  }) async {
+    final dur = timeout ?? _defaultTimeout;
+    for (int attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        _logger.d('HTTP GET attempt ${attempt + 1} -> $uri');
+        final resp = await _http.get(uri).timeout(dur);
+        if (resp.statusCode == 429) {
+          // Handle rate limiting: honor Retry-After if present
+          final ra = resp.headers['retry-after'];
+          int waitSeconds = 1 + attempt; // exponential-ish
+          if (ra != null) {
+            final parsed = int.tryParse(ra);
+            if (parsed != null) waitSeconds = parsed;
+          }
+          await Future.delayed(Duration(seconds: waitSeconds));
+          continue;
+        }
+        return resp;
+      } on TimeoutException catch (te) {
+        _logger.w('Timeout on GET $uri: ${te.message}');
+        if (attempt == maxRetries) rethrow;
+        await Future.delayed(Duration(milliseconds: 500 * (attempt + 1)));
+      } catch (e) {
+        _logger.w('GET error on $uri: $e');
+        if (attempt == maxRetries) rethrow;
         await Future.delayed(Duration(milliseconds: 500 * (attempt + 1)));
       }
     }
-    return [];
+    return null;
   }
 
   FoodItem? _foodItemFromOpenFoodFacts(Map<String, dynamic> product) {
@@ -235,6 +320,7 @@ class EnhancedApiService {
   Future<FoodItem?> fetchFoodByBarcode(
     String barcode, {
     int retries = 2,
+    bool forceDirect = false,
   }) async {
     final clean = barcode.trim();
     if (clean.isEmpty || !RegExp(r'^[0-9]+$').hasMatch(clean)) {
@@ -242,20 +328,73 @@ class EnhancedApiService {
       return null;
     }
 
+    final baseUrl =
+        'https://world.openfoodfacts.org/api/v0/product/$clean.json';
+
+    // If web and not forcing direct false, try direct first
+    if (kIsWeb && !forceDirect) {
+      try {
+        final directUri = Uri.parse(baseUrl);
+        _logger.d('Barcode lookup (direct): $directUri');
+        final directResp = await _http
+            .get(directUri)
+            .timeout(
+              const Duration(seconds: 15),
+              onTimeout: () =>
+                  throw TimeoutException('Direct barcode lookup timed out'),
+            );
+        if (directResp.statusCode == 200) {
+          final json = jsonDecode(directResp.body) as Map<String, dynamic>;
+          final status = json['status'];
+          if (status == 0 || status == '0') {
+            _logger.i('Product not found for barcode: $clean');
+            return null;
+          }
+          final product = json['product'] as Map<String, dynamic>?;
+          if (product == null || product.isEmpty) return null;
+          final item = _foodItemFromOpenFoodFacts(product);
+          if (item != null) {
+            _logger.i('Successfully found product: ${item.name} (direct)');
+          }
+          return item;
+        }
+      } catch (e, st) {
+        _logger.w(
+          'Direct barcode lookup failed, will try proxies: $e',
+          error: e,
+          stackTrace: st,
+        );
+      }
+    }
+
+    // prepare proxy candidates
+    final proxyCandidates = <String>[];
+    if (kIsWeb) {
+      for (final proxy in _corsProxies) {
+        if (proxy.contains('allorigins')) {
+          proxyCandidates.add('$proxy${Uri.encodeComponent(baseUrl)}');
+        } else {
+          proxyCandidates.add('$proxy$baseUrl');
+        }
+      }
+    } else {
+      proxyCandidates.add(baseUrl);
+    }
+
     for (int attempt = 0; attempt <= retries; attempt++) {
       try {
-        String urlStr =
-            'https://world.openfoodfacts.org/api/v0/product/$clean.json';
-        if (kIsWeb) {
-          urlStr = 'https://corsproxy.io/?${Uri.encodeComponent(urlStr)}';
-        }
+        final idx = attempt % proxyCandidates.length;
+        final urlStr = proxyCandidates[idx];
         final uri = Uri.parse(urlStr);
         _logger.d('Barcode lookup (attempt ${attempt + 1}): $uri');
 
+        final timeoutDuration = kIsWeb
+            ? const Duration(seconds: 30)
+            : const Duration(seconds: 20);
         final resp = await _http
             .get(uri)
             .timeout(
-              const Duration(seconds: 20),
+              timeoutDuration,
               onTimeout: () =>
                   throw TimeoutException('Barcode lookup timed out'),
             );
@@ -310,23 +449,32 @@ class EnhancedApiService {
     try {
       final q = query.trim();
       if (q.isEmpty) return [];
-      String urlStr =
+      String baseUrl =
           'https://www.themealdb.com/api/json/v1/1/search.php?s=${Uri.encodeComponent(q)}';
+      String urlStr = baseUrl;
       if (kIsWeb) {
-        urlStr = 'https://corsproxy.io/?${Uri.encodeComponent(urlStr)}';
+        final proxy = _corsProxies[0];
+        // prefer corsproxy for recipes, fallback handled by retries
+        if (proxy.contains('allorigins')) {
+          urlStr = '$proxy${Uri.encodeComponent(baseUrl)}';
+        } else {
+          urlStr = '$proxy$baseUrl';
+        }
       }
       final uri = Uri.parse(urlStr);
       _logger.d('Searching recipes: $uri');
 
-      final resp = await _http
-          .get(uri)
-          .timeout(
-            const Duration(seconds: 15),
-            onTimeout: () => throw TimeoutException('Recipe search timed out'),
-          );
+      final timeoutDuration = kIsWeb
+          ? const Duration(seconds: 20)
+          : const Duration(seconds: 15);
+      final resp = await _getWithRetries(
+        uri,
+        timeout: timeoutDuration,
+        maxRetries: _defaultMaxRetries,
+      );
 
-      if (resp.statusCode != 200) {
-        _logger.w('Recipe search returned status ${resp.statusCode}');
+      if (resp == null || resp.statusCode != 200) {
+        _logger.w('Recipe search returned status ${resp?.statusCode}');
         return [];
       }
 
@@ -378,8 +526,12 @@ class EnhancedApiService {
       final recipes = <Map<String, dynamic>>[];
       for (int i = 0; i < count; i++) {
         final uri = Uri.https('www.themealdb.com', '/api/json/v1/1/random.php');
-        final resp = await _http.get(uri).timeout(const Duration(seconds: 10));
-        if (resp.statusCode == 200) {
+        final resp = await _getWithRetries(
+          uri,
+          timeout: const Duration(seconds: 10),
+          maxRetries: 1,
+        );
+        if (resp != null && resp.statusCode == 200) {
           final json = jsonDecode(resp.body) as Map<String, dynamic>;
           final meals = (json['meals'] as List<dynamic>?) ?? [];
           if (meals.isNotEmpty) {
@@ -434,8 +586,12 @@ class EnhancedApiService {
       final uri = Uri.https('www.themealdb.com', '/api/json/v1/1/filter.php', {
         'c': category,
       });
-      final resp = await _http.get(uri).timeout(const Duration(seconds: 10));
-      if (resp.statusCode != 200) return [];
+      final resp = await _getWithRetries(
+        uri,
+        timeout: const Duration(seconds: 10),
+        maxRetries: _defaultMaxRetries,
+      );
+      if (resp == null || resp.statusCode != 200) return [];
 
       final json = jsonDecode(resp.body) as Map<String, dynamic>;
       final meals = (json['meals'] as List<dynamic>?) ?? [];
@@ -456,11 +612,13 @@ class EnhancedApiService {
               '/api/json/v1/1/lookup.php',
               {'i': mealId},
             );
-            final detailResp = await _http
-                .get(detailUri)
-                .timeout(const Duration(seconds: 5));
+            final detailResp = await _getWithRetries(
+              detailUri,
+              timeout: const Duration(seconds: 5),
+              maxRetries: 0,
+            );
 
-            if (detailResp.statusCode == 200) {
+            if (detailResp != null && detailResp.statusCode == 200) {
               final detailJson =
                   jsonDecode(detailResp.body) as Map<String, dynamic>;
               final detailMeals = (detailJson['meals'] as List<dynamic>?) ?? [];
@@ -545,5 +703,9 @@ class EnhancedApiService {
     'Vegetarian',
   ];
 
-  void dispose() => _http.close();
+  void dispose() {
+    if (_shouldCloseClient) {
+      _http.close();
+    }
+  }
 }
