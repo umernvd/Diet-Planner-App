@@ -9,7 +9,9 @@ import 'auth/login_screen.dart';
 import 'home_screen_new.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final VoidCallback? onLoginSuccess;
+
+  const ProfileScreen({super.key, this.onLoginSuccess});
 
   @override
   Widget build(BuildContext context) {
@@ -95,11 +97,16 @@ class ProfileScreen extends StatelessWidget {
                         title: 'Sign In',
                         subtitle: 'Sync your data across devices',
                         color: AppTheme.primary,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const LoginScreen(),
-                          ),
-                        ),
+                        onTap: () async {
+                          final result = await Navigator.of(context).push<bool>(
+                            MaterialPageRoute(
+                              builder: (_) => const LoginScreen(),
+                            ),
+                          );
+                          if (result == true && onLoginSuccess != null) {
+                            onLoginSuccess!();
+                          }
+                        },
                       ),
                     if (isSignedIn) ...[
                       _buildSettingCard(

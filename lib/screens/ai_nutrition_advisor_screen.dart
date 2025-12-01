@@ -33,7 +33,7 @@ class _AINutritionAdvisorScreenState extends State<AINutritionAdvisorScreen> {
         : '💾 Local AI Mode (Offline)';
 
     _addMessage(
-      'Hello! 👋 I\'m your AI nutrition advisor.\n\nStatus: $aiStatus\n\nAsk me anything about diet, nutrition, healthy eating, meal planning, or weight management!',
+      'Hey there! 👋 I\'m NutriBot, your friendly nutrition buddy! 🥗\n\n$aiStatus\n\nI\'m here to help you with anything about diet, nutrition, healthy eating, meal planning, or fitness goals! Feel free to ask me anything - let\'s make nutrition simple and fun together! 💪✨',
       isUser: false,
     );
   }
@@ -81,7 +81,13 @@ class _AINutritionAdvisorScreenState extends State<AINutritionAdvisorScreen> {
 
       String? response;
       if (_geminiService.isConfigured) {
-        response = await _geminiService.getDietAdvice(question);
+        // Add conversational context to the user's question
+        final conversationalPrompt =
+            '''
+User question: $question
+
+Please respond in a friendly, casual way with helpful nutrition advice. Use emojis where appropriate to make it engaging!''';
+        response = await _geminiService.getDietAdvice(conversationalPrompt);
       }
 
       response ??= await _hfService.getNutritionAdvice(question);

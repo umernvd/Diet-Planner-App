@@ -752,15 +752,36 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                           ),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       IconButton(
-                        icon: Icon(
-                          Icons.more_horiz_rounded,
-                          color: Colors.grey[400],
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: Colors.red,
+                          size: 20,
                         ),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
-                        onPressed: () => _showFoodOptions(context, f, today),
+                        tooltip: 'Delete meal',
+                        onPressed: () {
+                          _db.removeLoggedFood(today, f);
+                          setState(() {});
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Deleted ${f.name}'),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              action: SnackBarAction(
+                                label: 'UNDO',
+                                onPressed: () {
+                                  _db.logFood(today, f);
+                                  setState(() {});
+                                },
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -778,63 +799,6 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
     if (hour < 12) return 'Good morning! Ready to crush your goals?';
     if (hour < 17) return 'Good afternoon! Keep up the great work!';
     return 'Good evening! Finish strong today!';
-  }
-
-  void _showFoodOptions(BuildContext context, food, DateTime today) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.delete_outline_rounded,
-                  color: Colors.red,
-                ),
-                title: const Text('Delete'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _db.removeLoggedFood(today, food);
-                  setState(() {});
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Deleted ${food.name}'),
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      action: SnackBarAction(
-                        label: 'UNDO',
-                        onPressed: () {
-                          _db.logFood(today, food);
-                          setState(() {});
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildAIFeatureCard(

@@ -20,6 +20,8 @@ class _FoodSearchState extends State<FoodSearch> {
   final _db = FoodDatabaseService.instance;
   final _controller = TextEditingController();
   List<FoodItem> _results = [];
+  List<FoodItem> _cachedResults = [];
+  String _lastSearchQuery = '';
   bool _loading = false;
   String? _apiSource;
   Timer? _debounceTimer;
@@ -32,14 +34,26 @@ class _FoodSearchState extends State<FoodSearch> {
     if (query.trim().isEmpty) {
       setState(() {
         _results = [];
+        _cachedResults = [];
+        _lastSearchQuery = '';
         _errorMessage = null;
         _apiSource = null;
       });
       return;
     }
 
-    // Start new debounce timer (wait 500ms after user stops typing)
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+    // For very short queries, show nothing yet
+    if (query.trim().length < 2) {
+      setState(() {
+        _results = [];
+        _errorMessage = 'Please enter at least 2 characters';
+        _loading = false;
+      });
+      return;
+    }
+
+    // Reduced debounce timer for faster response (300ms instead of 500ms)
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
       _search(query);
     });
   }
@@ -54,6 +68,25 @@ class _FoodSearchState extends State<FoodSearch> {
         _errorMessage = 'Please enter at least 2 characters';
         _results = [];
         _loading = false;
+      });
+      return;
+    }
+
+    // Check cache - if search is similar to last query, filter locally
+    if (_lastSearchQuery.isNotEmpty &&
+        trimmedQuery.toLowerCase().contains(_lastSearchQuery.toLowerCase()) &&
+        _cachedResults.isNotEmpty) {
+      // Local filtering for faster results
+      final filtered = _cachedResults.where((food) {
+        return food.name.toLowerCase().contains(trimmedQuery.toLowerCase());
+      }).toList();
+
+      setState(() {
+        _results = filtered;
+        _loading = false;
+        _errorMessage = filtered.isEmpty
+            ? 'No foods found for "$trimmedQuery"'
+            : null;
       });
       return;
     }
@@ -76,9 +109,11 @@ class _FoodSearchState extends State<FoodSearch> {
 
       setState(() {
         _results = res;
+        _cachedResults = res; // Cache results
+        _lastSearchQuery = trimmedQuery; // Remember query
         _loading = false;
         _errorMessage = res.isEmpty
-            ? 'No foods found for \"$trimmedQuery\"'
+            ? 'No foods found for "$trimmedQuery"'
             : null;
         if (res.isNotEmpty) {
           // Detect which API was used based on ID prefix
@@ -303,14 +338,14 @@ class _FoodSearchState extends State<FoodSearch> {
           child: _results.isEmpty
               ? const SizedBox.shrink()
               : ListView.builder(
+                  key: ValueKey(_results.length), // Optimize rebuilds
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: _results.length,
                   itemBuilder: (context, i) {
                     final f = _results[i];
-                    return AnimatedContainer(
-                      duration: Duration(milliseconds: 200 + (i * 50)),
-                      curve: Curves.easeOut,
+                    return Container(
+                      key: ValueKey(f.id), // Stable key for each item
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,

@@ -172,21 +172,18 @@ class _MealPlannerScreenState extends State<MealPlannerScreen>
                   firstDate: DateTime.now(),
                   lastDate: DateTime.now().add(const Duration(days: 365)),
                 );
-                if (targetDate == null) return;
-                if (!mounted) return;
+                if (targetDate == null || !mounted) return;
 
                 _planService.copyPlanToDate(_selectedDate, targetDate);
 
                 if (!mounted) return;
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Plan copied to ${targetDate.month}/${targetDate.day}/${targetDate.year}',
-                      ),
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Plan copied to ${targetDate.month}/${targetDate.day}/${targetDate.year}',
                     ),
-                  );
-                }
+                  ),
+                );
               },
             ),
             ListTile(
@@ -763,7 +760,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen>
                           ),
                         ),
                         Text(
-                          '${food.calories.toStringAsFixed(0)}',
+                          food.calories.toStringAsFixed(0),
                           style: AppTheme.titleMedium.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppTheme.textPrimary,

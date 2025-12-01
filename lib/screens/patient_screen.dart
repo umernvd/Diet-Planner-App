@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
-import '../services/huggingface_ai_service.dart';
+import '../services/ai_service.dart';
 
 class PatientScreen extends StatefulWidget {
   const PatientScreen({super.key});
@@ -12,7 +12,7 @@ class PatientScreen extends StatefulWidget {
 class _PatientScreenState extends State<PatientScreen> {
   final _formKey = GlobalKey<FormState>();
   final _diseaseController = TextEditingController();
-  final _aiService = HuggingFaceAIService.instance;
+  final _aiService = AIService.instance;
 
   bool _isLoading = false;
   List<Map<String, dynamic>> _suggestedRecipes = [];
@@ -54,26 +54,83 @@ class _PatientScreenState extends State<PatientScreen> {
     try {
       final disease = _diseaseController.text.trim();
 
-      // Try to get AI-generated recipes
-      try {
-        final prompt =
-            'As a nutrition expert, suggest 5 healthy recipes for someone with $disease. '
-            'For each recipe include: recipe name, brief description, health benefits for $disease, '
-            'main ingredients, estimated calories, and prep time.';
+      // Try to get AI-generated recipes using Gemini
+      if (_aiService.isConfigured) {
+        try {
+          developer.log('Using Gemini AI for recipe suggestions for: $disease');
 
-        final response = await _aiService.getNutritionAdvice(prompt);
+          final prompt =
+              '''
+As a professional nutrition expert, suggest 5 healthy recipes specifically for someone with $disease.
 
-        if (response != null && response.length > 50) {
-          final recipes = _parseRecipes(response);
-          if (recipes.isNotEmpty) {
-            setState(() {
-              _suggestedRecipes = recipes;
-            });
-            return;
+For each recipe, provide the information in this EXACT format:
+
+---
+RECIPE: [Recipe Name]
+DESCRIPTION: [Brief 1-2 sentence description]
+BENEFITS: [Explain specifically how this recipe helps manage $disease]
+INGREDIENTS: [List main ingredients separated by commas]
+CALORIES: [Estimated calories per serving as a number]
+PREP_TIME: [Preparation time like "25 minutes"]
+SERVINGS: [Recommended servings per day like "1 serving per day"]
+PORTION_SIZE: [Portion size like "1 cup" or "4-6 oz"]
+---
+
+Provide exactly 5 recipes following this format. Make the recipes practical, easy to prepare, and specifically beneficial for managing $disease.''';
+
+          final response = await _aiService.getDietAdvice(prompt);
+
+          if (response != null && response.length > 100) {
+            developer.log(
+              'Received AI response: ${response.substring(0, 100)}...',
+            );
+            final recipes = _parseRecipes(response);
+            if (recipes.isNotEmpty) {
+              setState(() {
+                _suggestedRecipes = recipes;
+              });
+
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      '✨ AI-generated recipes based on your condition',
+                    ),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+              return;
+            } else {
+              developer.log('No recipes parsed from AI response');
+            }
+          } else {
+            developer.log('AI response was null or too short');
+          }
+        } catch (e, st) {
+          developer.log('AI service error', error: e, stackTrace: st);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('AI error: ${e.toString()}'),
+                backgroundColor: Colors.orange,
+                duration: const Duration(seconds: 2),
+              ),
+            );
           }
         }
-      } catch (e) {
-        developer.log('AI service error', error: e);
+      } else {
+        developer.log('Gemini AI not configured');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('⚠️ AI not configured. Using curated recipes.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       }
 
       // Fallback to predefined recipes based on disease
@@ -82,7 +139,7 @@ class _PatientScreenState extends State<PatientScreen> {
         _suggestedRecipes = fallbackRecipes;
       });
 
-      if (mounted) {
+      if (mounted && _suggestedRecipes.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Showing curated recipes for your condition'),
@@ -92,6 +149,7 @@ class _PatientScreenState extends State<PatientScreen> {
         );
       }
     } catch (e) {
+      developer.log('Error in _getSuggestions', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -361,28 +419,53 @@ class _PatientScreenState extends State<PatientScreen> {
       final lines = section.split('\n');
 
       for (final line in lines) {
-        if (line.contains('RECIPE:')) {
-          recipe['name'] = line.replaceFirst('RECIPE:', '').trim();
-        } else if (line.contains('DESCRIPTION:')) {
-          recipe['description'] = line.replaceFirst('DESCRIPTION:', '').trim();
-        } else if (line.contains('BENEFITS:')) {
-          recipe['benefits'] = line.replaceFirst('BENEFITS:', '').trim();
-        } else if (line.contains('INGREDIENTS:')) {
-          recipe['ingredients'] = line.replaceFirst('INGREDIENTS:', '').trim();
-        } else if (line.contains('CALORIES:')) {
-          final caloriesStr = line.replaceFirst('CALORIES:', '').trim();
+        final trimmedLine = line.trim();
+        if (trimmedLine.isEmpty) continue;
+
+        if (trimmedLine.contains('RECIPE:')) {
+          recipe['name'] = trimmedLine.replaceFirst('RECIPE:', '').trim();
+        } else if (trimmedLine.contains('DESCRIPTION:')) {
+          recipe['description'] = trimmedLine
+              .replaceFirst('DESCRIPTION:', '')
+              .trim();
+        } else if (trimmedLine.contains('BENEFITS:')) {
+          recipe['benefits'] = trimmedLine.replaceFirst('BENEFITS:', '').trim();
+        } else if (trimmedLine.contains('INGREDIENTS:')) {
+          recipe['ingredients'] = trimmedLine
+              .replaceFirst('INGREDIENTS:', '')
+              .trim();
+        } else if (trimmedLine.contains('CALORIES:')) {
+          final caloriesStr = trimmedLine.replaceFirst('CALORIES:', '').trim();
           recipe['calories'] =
               int.tryParse(caloriesStr.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-        } else if (line.contains('PREP_TIME:')) {
-          recipe['prepTime'] = line.replaceFirst('PREP_TIME:', '').trim();
+        } else if (trimmedLine.contains('PREP_TIME:')) {
+          recipe['prepTime'] = trimmedLine
+              .replaceFirst('PREP_TIME:', '')
+              .trim();
+        } else if (trimmedLine.contains('SERVINGS:')) {
+          recipe['servings'] = trimmedLine.replaceFirst('SERVINGS:', '').trim();
+        } else if (trimmedLine.contains('PORTION_SIZE:')) {
+          recipe['portionSize'] = trimmedLine
+              .replaceFirst('PORTION_SIZE:', '')
+              .trim();
         }
       }
 
       if (recipe.isNotEmpty && recipe['name'] != null) {
+        // Ensure all required fields have default values
+        recipe['description'] ??= 'A healthy recipe recommendation';
+        recipe['benefits'] ??= 'Nutritious and beneficial for your condition';
+        recipe['ingredients'] ??= 'Various healthy ingredients';
+        recipe['calories'] ??= 0;
+        recipe['prepTime'] ??= '30 minutes';
+        recipe['servings'] ??= '1 serving per day';
+        recipe['portionSize'] ??= '1 portion';
+
         recipes.add(recipe);
       }
     }
 
+    developer.log('Parsed ${recipes.length} recipes from AI response');
     return recipes;
   }
 

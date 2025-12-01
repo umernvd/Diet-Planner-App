@@ -139,6 +139,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
               onTap: () async {
                 if (!mounted) return;
                 Navigator.pop(context);
+                final messenger = ScaffoldMessenger.of(context);
                 final targetDate = await showDatePicker(
                   context: context,
                   initialDate: _selectedDate.add(const Duration(days: 1)),
@@ -150,16 +151,13 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
 
                 _planService.copyPlanToDate(_selectedDate, targetDate);
 
-                if (!mounted) return;
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Plan copied to ${targetDate.month}/${targetDate.day}/${targetDate.year}',
-                      ),
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Plan copied to ${targetDate.month}/${targetDate.day}/${targetDate.year}',
                     ),
-                  );
-                }
+                  ),
+                );
               },
             ),
             ListTile(

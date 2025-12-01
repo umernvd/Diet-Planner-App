@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 import '../config/app_theme.dart';
 import '../models/user_profile.dart';
 import '../services/food_database_service.dart';
@@ -75,7 +74,11 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
       const ProgressScreen(),
       const RecipeScreenEnhanced(),
       const PatientScreen(),
-      const ProfileScreen(),
+      ProfileScreen(
+        onLoginSuccess: () {
+          setState(() => _index = 0);
+        },
+      ),
     ];
 
     return Scaffold(
@@ -800,24 +803,60 @@ class _HomeScreenRedesignedState extends State<HomeScreenRedesigned>
                             ],
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.accent.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.radiusFull,
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.accent.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusFull,
+                                ),
+                              ),
+                              child: Text(
+                                '${f.calories.toStringAsFixed(0)} kcal',
+                                style: AppTheme.labelSmall.copyWith(
+                                  color: AppTheme.accent,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            '${f.calories.toStringAsFixed(0)} kcal',
-                            style: AppTheme.labelSmall.copyWith(
-                              color: AppTheme.accent,
-                              fontWeight: FontWeight.bold,
+                            const SizedBox(height: 8),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline_rounded,
+                                color: Colors.red,
+                                size: 20,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              tooltip: 'Delete meal',
+                              onPressed: () {
+                                _db.removeLoggedFood(today, f);
+                                setState(() {});
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Deleted ${f.name}'),
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    action: SnackBarAction(
+                                      label: 'UNDO',
+                                      onPressed: () {
+                                        _db.logFood(today, f);
+                                        setState(() {});
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),

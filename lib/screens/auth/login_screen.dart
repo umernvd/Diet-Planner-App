@@ -43,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await _loadUserData();
 
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true);
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -51,56 +51,6 @@ class _LoginScreenState extends State<LoginScreen> {
           SnackBar(
             content: Text(_auth.getErrorMessage(e)),
             backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _signInWithGoogle() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final credential = await _auth.signInWithGoogle();
-
-      if (credential == null) {
-        // User cancelled
-        if (mounted) setState(() => _isLoading = false);
-        return;
-      }
-
-      // Load user data after successful sign in
-      await _loadUserData();
-
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_auth.getErrorMessage(e)),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        final errorMessage = _auth.getGeneralErrorMessage(e);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.orange,
-            action: SnackBarAction(
-              label: 'Use Email',
-              textColor: Colors.white,
-              onPressed: () {
-                // Stays on login screen to use email/password
-              },
-            ),
-            duration: const Duration(seconds: 6),
           ),
         );
       }
@@ -313,64 +263,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                       style: TextStyle(fontSize: 16),
                                     ),
                             ),
-                            const SizedBox(height: 16),
-
-                            // OR Divider
-                            Row(
-                              children: [
-                                const Expanded(child: Divider()),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                  ),
-                                  child: Text(
-                                    'OR',
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                                const Expanded(child: Divider()),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Google Sign-In Button
-                            OutlinedButton.icon(
-                              onPressed: _isLoading ? null : _signInWithGoogle,
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                side: BorderSide(color: Colors.grey.shade300),
-                              ),
-                              icon: Image.network(
-                                'https://www.google.com/favicon.ico',
-                                height: 20,
-                                width: 20,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(
-                                    Icons.g_mobiledata,
-                                    size: 24,
-                                  );
-                                },
-                              ),
-                              label: const Text(
-                                'Continue with Google',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 24),
 
                             // Sign Up Link
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text("Don't have an account? "),
+                                const Flexible(
+                                  child: Text(
+                                    "Don't have an account? ",
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                                 TextButton(
                                   onPressed: () {
                                     Navigator.of(context).push(
@@ -379,6 +283,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     );
                                   },
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    minimumSize: Size.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
                                   child: const Text('Sign Up'),
                                 ),
                               ],

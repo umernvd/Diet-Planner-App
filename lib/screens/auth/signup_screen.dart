@@ -53,8 +53,8 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         );
 
-        // Return to previous screen (Home is already underneath)
-        Navigator.of(context).pop();
+        // Return to previous screen with success flag
+        Navigator.of(context).pop(true);
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -68,71 +68,6 @@ class _SignupScreenState extends State<SignupScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  Future<void> _signInWithGoogle() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final credential = await _auth.signInWithGoogle();
-
-      if (credential == null) {
-        // User cancelled
-        if (mounted) setState(() => _isLoading = false);
-        return;
-      }
-
-      // Load user data after successful sign in
-      await _loadUserData();
-
-      if (mounted) {
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Signed in with Google successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        // Return to previous screen (Home is already underneath)
-        Navigator.of(context).pop();
-      }
-    } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_auth.getErrorMessage(e)),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        final errorMessage = _auth.getGeneralErrorMessage(e);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.orange,
-            action: SnackBarAction(
-              label: 'Use Email',
-              textColor: Colors.white,
-              onPressed: () {
-                // Stays on signup screen to use email/password
-              },
-            ),
-            duration: const Duration(seconds: 6),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _loadUserData() async {
-    // Load food logs and meal plans from Firebase
-    await FoodDatabaseService.instance.loadUserData();
-    await MealPlanService.instance.loadMealPlans();
   }
 
   @override
@@ -345,68 +280,31 @@ class _SignupScreenState extends State<SignupScreen> {
                                       style: TextStyle(fontSize: 16),
                                     ),
                             ),
-                            const SizedBox(height: 16),
-
-                            // OR Divider
-                            Row(
-                              children: [
-                                const Expanded(child: Divider()),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                  ),
-                                  child: Text(
-                                    'OR',
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                                const Expanded(child: Divider()),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Google Sign-In Button
-                            OutlinedButton.icon(
-                              onPressed: _isLoading ? null : _signInWithGoogle,
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                side: BorderSide(color: Colors.grey.shade300),
-                              ),
-                              icon: Image.network(
-                                'https://www.google.com/favicon.ico',
-                                height: 20,
-                                width: 20,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(
-                                    Icons.g_mobiledata,
-                                    size: 24,
-                                  );
-                                },
-                              ),
-                              label: const Text(
-                                'Continue with Google',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 24),
 
                             // Sign In Link
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text('Already have an account? '),
+                                const Flexible(
+                                  child: Text(
+                                    'Already have an account? ',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                                 TextButton(
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    minimumSize: Size.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
                                   child: const Text('Sign In'),
                                 ),
                               ],
